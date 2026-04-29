@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct ExtensionColorMap: Equatable {
+public struct ExtensionColorMap: Equatable, Sendable {
     private var map: [String: Color] = [:]
 
     public init(root: FSNode) {
