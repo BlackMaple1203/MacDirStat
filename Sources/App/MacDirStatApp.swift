@@ -17,9 +17,9 @@ struct MacDirStatApp: App {
                 }
                 .keyboardShortcut("o", modifiers: .command)
             }
-            CommandGroup(replacing: .saveItem) {
+            CommandGroup(after: .newItem) {
                 Button("Export CSV…") {
-                    NotificationCenter.default.post(name: NSNotification.Name("MacDirStat.exportCSV"), object: nil)
+                    NotificationCenter.default.post(name: .exportCSV, object: nil)
                 }
                 .keyboardShortcut("e", modifiers: [.command, .shift])
             }

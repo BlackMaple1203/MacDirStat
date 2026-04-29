@@ -164,20 +164,32 @@ public final class ScanViewModel: ObservableObject {
         panel.nameFieldStringValue = "\(root.name)-disk-usage.csv"
         guard panel.runModal() == .OK, let url = panel.url else { return }
 
-        var lines = ["Path,Size (bytes),Size,Type,Duplicate Group"]
-        appendCSV(node: root, to: &lines)
-        let csv = lines.joined(separator: "\n")
-
-        Task.detached(priority: .utility) {
-            try? csv.write(to: url, atomically: true, encoding: .utf8)
+        Task.detached(priority: .utility) { [root] in
+            var lines = ["Path,Size (bytes),Human Size,Type,Duplicate Group"]
+            Self.appendCSV(node: root, to: &lines)
+            let csv = lines.joined(separator: "\n") + "\n"
+            do {
+                try csv.write(to: url, atomically: true, encoding: .utf8)
+            } catch {
+                await MainActor.run { self.errorMessage = error.localizedDescription }
+            }
         }
     }
 
-    private func appendCSV(node: FSNode, to lines: inout [String]) {
-        let path = node.url.path.replacingOccurrences(of: ",", with: ";")
+    private nonisolated static func csvEscape(_ value: String) -> String {
+        "\"\(value.replacingOccurrences(of: "\"", with: "\"\""))\""
+    }
+
+    private nonisolated static func appendCSV(node: FSNode, to lines: inout [String]) {
         let type = node.isDirectory ? "directory" : node.fileExtension
         let group = node.duplicateGroupID?.uuidString ?? ""
-        lines.append("\"\(path)\",\(node.size),\(ByteFormatter.string(from: node.size)),\(type),\(group)")
+        lines.append([
+            csvEscape(node.url.path),
+            "\(node.size)",
+            csvEscape(ByteFormatter.string(from: node.size)),
+            csvEscape(type),
+            csvEscape(group)
+        ].joined(separator: ","))
         for child in node.children { appendCSV(node: child, to: &lines) }
     }
 }
