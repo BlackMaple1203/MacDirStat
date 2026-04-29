@@ -46,4 +46,67 @@ final class TreemapLayoutTests: XCTestCase {
         }
         return root
     }
+
+    func test_layout_single_item_fills_rect() {
+        let root = makeTree([("a.pdf", 1000)])
+        let map = ExtensionColorMap(root: root)
+        let rect = CGRect(x: 0, y: 0, width: 200, height: 100)
+        let cells = TreemapLayout.compute(root: root, in: rect, colorMap: map)
+        XCTAssertEqual(cells.count, 1)
+        XCTAssertTrue(cells[0].rect.intersects(rect))
+    }
+
+    func test_layout_two_equal_items_fill_rect() {
+        let root = makeTree([("a.pdf", 500), ("b.mp4", 500)])
+        let map = ExtensionColorMap(root: root)
+        let rect = CGRect(x: 0, y: 0, width: 200, height: 100)
+        let cells = TreemapLayout.compute(root: root, in: rect, colorMap: map)
+        XCTAssertEqual(cells.count, 2)
+        let totalArea = cells.reduce(0.0) { $0 + $1.rect.width * $1.rect.height }
+        XCTAssertEqual(totalArea, rect.width * rect.height, accuracy: 10)
+    }
+
+    func test_layout_cells_dont_overlap() {
+        let root = makeTree([("a.pdf", 300), ("b.mp4", 200), ("c.zip", 100), ("d.txt", 400)])
+        let map = ExtensionColorMap(root: root)
+        let rect = CGRect(x: 0, y: 0, width: 400, height: 300)
+        let cells = TreemapLayout.compute(root: root, in: rect, colorMap: map)
+        for i in 0..<cells.count {
+            for j in (i+1)..<cells.count {
+                let intersection = cells[i].rect.intersection(cells[j].rect)
+                XCTAssertTrue(intersection.isEmpty || intersection.width < 2 || intersection.height < 2,
+                              "cells \(i) and \(j) overlap: \(intersection)")
+            }
+        }
+    }
+
+    func test_layout_cells_within_parent_rect() {
+        let root = makeTree([("a.pdf", 100), ("b.mp4", 200), ("c.zip", 300)])
+        let map = ExtensionColorMap(root: root)
+        let rect = CGRect(x: 0, y: 0, width: 300, height: 200)
+        let cells = TreemapLayout.compute(root: root, in: rect, colorMap: map)
+        for cell in cells {
+            XCTAssertTrue(rect.contains(cell.rect) || rect.insetBy(dx: -2, dy: -2).contains(cell.rect),
+                          "cell \(cell.node.name) out of bounds: \(cell.rect)")
+        }
+    }
+
+    func test_layout_empty_children_returns_no_cells() {
+        let root = FSNode(url: URL(fileURLWithPath: "/"), name: "/", isDirectory: true, size: 0, fileExtension: "", parent: nil)
+        let map = ExtensionColorMap(root: root)
+        let cells = TreemapLayout.compute(root: root, in: CGRect(x: 0, y: 0, width: 200, height: 100), colorMap: map)
+        XCTAssertTrue(cells.isEmpty)
+    }
+
+    func test_layout_larger_items_get_larger_cells() {
+        let root = makeTree([("small.txt", 100), ("large.pdf", 900)])
+        let map = ExtensionColorMap(root: root)
+        let rect = CGRect(x: 0, y: 0, width: 400, height: 200)
+        let cells = TreemapLayout.compute(root: root, in: rect, colorMap: map)
+        XCTAssertEqual(cells.count, 2)
+        let largeCell = cells.first { $0.node.name == "large.pdf" }!
+        let smallCell = cells.first { $0.node.name == "small.txt" }!
+        XCTAssertGreaterThan(largeCell.rect.width * largeCell.rect.height,
+                             smallCell.rect.width * smallCell.rect.height)
+    }
 }
