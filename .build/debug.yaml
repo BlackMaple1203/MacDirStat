@@ -1,0 +1,81 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "MacDirStat-arm64-apple-macosx-debug.exe": ["<MacDirStat-arm64-apple-macosx-debug.exe>"]
+  "MacDirStat-arm64-apple-macosx-debug.module": ["<MacDirStat-arm64-apple-macosx-debug.module>"]
+  "PackageStructure": ["<PackageStructure>"]
+  "main": ["<MacDirStat-arm64-apple-macosx-debug.exe>","<MacDirStat-arm64-apple-macosx-debug.module>"]
+  "test": ["<MacDirStat-arm64-apple-macosx-debug.exe>","<MacDirStat-arm64-apple-macosx-debug.module>"]
+default: "main"
+nodes:
+  "/Users/ti/Documents/Projects/MacDirStat/Sources/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat":
+    is-mutated: true
+commands:
+  "/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat-entitlement.plist":
+    tool: write-auxiliary-file
+    inputs: ["<entitlement-plist>","<com.apple.security.get-task-allow>"]
+    outputs: ["/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat-entitlement.plist"]
+    description: "Write auxiliary file /Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat-entitlement.plist"
+
+  "/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/ti/Documents/Projects/MacDirStat/Sources/App/MacDirStatApp.swift"]
+    outputs: ["/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.build/sources"]
+    description: "Write auxiliary file /Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.build/sources"
+
+  "/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.build/MacDirStatApp.swift.o"]
+    outputs: ["/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.product/Objects.LinkFileList"
+
+  "/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"]
+    outputs: ["/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+
+  "<MacDirStat-arm64-apple-macosx-debug.exe>":
+    tool: phony
+    inputs: ["<MacDirStat-arm64-apple-macosx-debug.exe-CodeSigning>"]
+    outputs: ["<MacDirStat-arm64-apple-macosx-debug.exe>"]
+
+  "<MacDirStat-arm64-apple-macosx-debug.module>":
+    tool: phony
+    inputs: ["/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.build/MacDirStatApp.swift.o","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/Modules/MacDirStat.swiftmodule"]
+    outputs: ["<MacDirStat-arm64-apple-macosx-debug.module>"]
+
+  "C.MacDirStat-arm64-apple-macosx-debug.exe":
+    tool: shell
+    inputs: ["/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.build/MacDirStatApp.swift.o","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.product/Objects.LinkFileList"]
+    outputs: ["/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat"]
+    description: "Linking ./.build/arm64-apple-macosx/debug/MacDirStat"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-L","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug","-o","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat","-module-name","MacDirStat","-Xlinker","-no_warn_duplicate_libraries","-emit-executable","-Xlinker","-alias","-Xlinker","_MacDirStat_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.product/Objects.LinkFileList","-enable-experimental-feature","StrictConcurrency","-Xlinker","-rpath","-Xlinker","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-6.2/macosx","-target","arm64-apple-macosx14.0","-Xlinker","-add_ast_path","-Xlinker","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/Modules/MacDirStat.swiftmodule","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g"]
+
+  "C.MacDirStat-arm64-apple-macosx-debug.exe-entitlements":
+    tool: shell
+    inputs: ["/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat-entitlement.plist"]
+    outputs: ["<MacDirStat-arm64-apple-macosx-debug.exe-CodeSigning>"]
+    description: "Applying debug entitlements to ./.build/arm64-apple-macosx/debug/MacDirStat"
+    args: ["codesign","--force","--sign","-","--entitlements","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat-entitlement.plist","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat"]
+
+  "C.MacDirStat-arm64-apple-macosx-debug.module":
+    tool: shell
+    inputs: ["/Users/ti/Documents/Projects/MacDirStat/Sources/App/MacDirStatApp.swift","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.build/sources"]
+    outputs: ["/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.build/MacDirStatApp.swift.o","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/Modules/MacDirStat.swiftmodule"]
+    description: "Compiling Swift Module 'MacDirStat' (1 sources)"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-module-name","MacDirStat","-emit-dependencies","-emit-module","-emit-module-path","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/Modules/MacDirStat.swiftmodule","-output-file-map","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.build/output-file-map.json","-incremental","-c","@/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/MacDirStat.build/sources","-I","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx14.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j16","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/ti/Documents/Projects/MacDirStat/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","MacDirStat_main","-parse-as-library","-swift-version","5","-enable-experimental-feature","StrictConcurrency","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g","-Xcc","-isysroot","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Xcc","-fPIC","-Xcc","-g","-package-name","macdirstat"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/ti/Documents/Projects/MacDirStat/Sources/","/Users/ti/Documents/Projects/MacDirStat/Package.swift","/Users/ti/Documents/Projects/MacDirStat/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+
