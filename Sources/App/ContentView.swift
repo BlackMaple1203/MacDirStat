@@ -22,6 +22,11 @@ struct ContentView: View {
                     .frame(minHeight: 120, idealHeight: 180, maxHeight: 280)
             }
         }
+        .dropDestination(for: URL.self) { urls, _ in
+            guard let url = urls.first, url.hasDirectoryPath else { return false }
+            Task { @MainActor in vm.scan(url: url) }
+            return true
+        }
         .toolbar {
             ToolbarItemGroup(placement: .navigation) {
                 Button(action: { vm.drillUp() }) {
