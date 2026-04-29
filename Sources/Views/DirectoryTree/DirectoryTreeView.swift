@@ -27,14 +27,9 @@ struct DirectoryTreeView: View {
                         }
                 }
                 .listStyle(.inset)
-            } else if vm.isScanning {
-                ScanningPlaceholder(items: vm.itemsScanned, bytes: vm.bytesFound)
             } else {
-                ContentUnavailableView(
-                    "No Folder Selected",
-                    systemImage: "folder.badge.questionmark",
-                    description: Text("Drag a folder here or click Open Folder")
-                )
+                // Scanning in progress — root not yet available
+                ScanningPlaceholder(items: vm.itemsScanned, bytes: vm.bytesFound)
             }
         }
     }

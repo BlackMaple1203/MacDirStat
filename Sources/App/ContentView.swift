@@ -9,6 +9,55 @@ struct ContentView: View {
             SidebarView()
                 .navigationSplitViewColumnWidth(min: 180, ideal: 220, max: 300)
         } detail: {
+            detailContent
+        }
+        .dropDestination(for: URL.self) { urls, _ in
+            guard let url = urls.first, url.hasDirectoryPath else { return false }
+            vm.scan(url: url)
+            return true
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .navigation) {
+                if vm.root != nil || vm.isScanning {
+                    Button { vm.drillUp() } label: {
+                        Image(systemName: "chevron.left")
+                    }
+                    .disabled(vm.drillStack.isEmpty)
+
+                    if let node = vm.treemapRoot {
+                        BreadcrumbView(url: node.url)
+                    }
+                }
+            }
+
+            ToolbarItemGroup(placement: .primaryAction) {
+                if vm.isScanning {
+                    HStack(spacing: 6) {
+                        ProgressView().controlSize(.small)
+                        Text("\(vm.itemsScanned) items")
+                            .font(.caption).foregroundStyle(.secondary).monospacedDigit()
+                        Button("Cancel") { vm.cancelScan() }
+                            .foregroundStyle(.red)
+                    }
+                    .transition(.opacity)
+                } else {
+                    Button("Open Folder…") { openFolderPicker(vm: vm) }
+                        .buttonStyle(.borderedProminent)
+                }
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: vm.isScanning)
+        .onReceive(NotificationCenter.default.publisher(for: .exportCSV)) { _ in
+            vm.exportCSV()
+        }
+    }
+
+    @ViewBuilder
+    private var detailContent: some View {
+        if vm.root == nil && !vm.isScanning {
+            // Single beautiful empty state — no split panels
+            WelcomeView()
+        } else {
             VStack(spacing: 0) {
                 HSplitView {
                     DirectoryTreeView()
@@ -16,65 +65,66 @@ struct ContentView: View {
                     TreemapView()
                         .frame(minWidth: 300)
                 }
-                Divider()
-                ExtensionListView()
-                    .frame(minHeight: 120, idealHeight: 180, maxHeight: 280)
-            }
-        }
-        .dropDestination(for: URL.self) { urls, _ in
-            guard let url = urls.first, url.hasDirectoryPath else { return false }
-            Task { @MainActor in vm.scan(url: url) }
-            return true
-        }
-        .toolbar {
-            ToolbarItemGroup(placement: .navigation) {
-                Button { vm.drillUp() } label: {
-                    Image(systemName: "chevron.left")
-                }
-                .disabled(vm.drillStack.isEmpty)
-                .help("Go up one level")
 
-                if let node = vm.treemapRoot {
-                    BreadcrumbView(url: node.url)
-                }
-            }
-
-            ToolbarItemGroup(placement: .primaryAction) {
-                if vm.isScanning {
+                if !vm.extensionSummaries.isEmpty {
+                    Divider()
+                    ExtensionListView()
+                        .frame(minHeight: 120, idealHeight: 180, maxHeight: 280)
+                } else if vm.isScanning {
+                    Divider()
                     HStack(spacing: 8) {
-                        ProgressView()
-                            .controlSize(.small)
-                        Text("\(vm.itemsScanned) items")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
-                            .transition(.opacity)
-                        Button("Cancel") { vm.cancelScan() }
-                            .foregroundStyle(.red)
+                        ProgressView().controlSize(.small)
+                        Text("Scanning extensions…")
+                            .font(.caption).foregroundStyle(.secondary)
                     }
-                    .transition(.opacity)
-                } else {
-                    Button { openFolderPicker(vm: vm) } label: {
-                        Label("Open Folder…", systemImage: "folder.badge.plus")
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .help("Choose a folder to scan (⌘O)")
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 44)
+                    .background(Color(nsColor: .windowBackgroundColor))
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .exportCSV)) { _ in
-            vm.exportCSV()
-        }
-        .animation(.easeInOut(duration: 0.2), value: vm.isScanning)
     }
 }
+
+// MARK: - Welcome screen
+
+private struct WelcomeView: View {
+    @EnvironmentObject private var vm: ScanViewModel
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Image(systemName: "square.3.layers.3d")
+                .font(.system(size: 72, weight: .thin))
+                .foregroundStyle(.quaternary)
+                .symbolRenderingMode(.hierarchical)
+
+            VStack(spacing: 8) {
+                Text("MacDirStat")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                Text("Visualize your disk space usage at a glance")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+            }
+
+            Button("Open Folder…") { openFolderPicker(vm: vm) }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .keyboardShortcut("o", modifiers: .command)
+
+            Text("Or drop a folder anywhere in this window")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+// MARK: - Breadcrumb
 
 private struct BreadcrumbView: View {
     let url: URL
 
-    private var parts: [String] {
-        url.pathComponents.filter { $0 != "/" }
-    }
+    private var parts: [String] { url.pathComponents.filter { $0 != "/" } }
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -93,9 +143,11 @@ private struct BreadcrumbView: View {
             }
             .padding(.horizontal, 2)
         }
-        .frame(maxWidth: 400)
+        .frame(maxWidth: 380)
     }
 }
+
+// MARK: - Helpers
 
 extension Notification.Name {
     static let exportCSV = Notification.Name("MacDirStat.exportCSV")

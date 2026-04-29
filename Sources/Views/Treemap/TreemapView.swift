@@ -86,12 +86,12 @@ struct TreemapView: View {
                         .transition(.opacity.animation(.easeInOut(duration: 0.1)))
                 }
 
-                // Empty state
-                if vm.cells.isEmpty && !vm.isScanning {
+                // Empty directory (root exists but no cells)
+                if vm.cells.isEmpty && !vm.isScanning && vm.root != nil {
                     ContentUnavailableView(
-                        vm.root == nil ? "Open a Folder" : "Nothing to Display",
-                        systemImage: "square.3.layers.3d",
-                        description: Text(vm.root == nil ? "Drag a folder here or click Open Folder" : "The selected folder appears to be empty")
+                        "Empty Folder",
+                        systemImage: "folder",
+                        description: Text("This folder contains no files")
                     )
                 }
             }

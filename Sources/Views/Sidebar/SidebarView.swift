@@ -6,8 +6,9 @@ struct SidebarView: View {
     @AppStorage("recentPaths") private var recentPathsData: Data = Data()
 
     private var recentPaths: [URL] {
-        (try? JSONDecoder().decode([String].self, from: recentPathsData))
-            .map { $0.compactMap { URL(fileURLWithPath: $0) } } ?? []
+        ((try? JSONDecoder().decode([String].self, from: recentPathsData))
+            .map { $0.compactMap { URL(fileURLWithPath: $0) } } ?? [])
+            .filter { $0.path != "/" }
     }
 
     var body: some View {
