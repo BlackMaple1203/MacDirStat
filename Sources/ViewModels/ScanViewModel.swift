@@ -29,6 +29,7 @@ public final class ScanViewModel: ObservableObject {
         colorMap = nil
         selectedNode = nil
         duplicatesReady = false
+        highlightedExtension = nil
         drillStack = []
         isScanning = true
         errorMessage = nil
