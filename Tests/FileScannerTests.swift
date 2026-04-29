@@ -30,4 +30,66 @@ final class FileScannerTests: XCTestCase {
         dir = nil
         XCTAssertNil(child.parent)
     }
+
+    func test_scanner_builds_tree_from_temp_directory() async throws {
+        let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: tmp, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tmp) }
+
+        let file1 = tmp.appendingPathComponent("hello.txt")
+        let file2 = tmp.appendingPathComponent("world.pdf")
+        try "Hello".data(using: .utf8)!.write(to: file1)
+        try Data(repeating: 0, count: 2048).write(to: file2)
+
+        let scanner = FileScanner()
+        var root: FSNode?
+        for await progress in await scanner.scan(url: tmp) {
+            if case .completed(let node) = progress { root = node }
+        }
+
+        XCTAssertNotNil(root)
+        XCTAssertTrue(root!.isDirectory)
+        XCTAssertEqual(root!.children.count, 2)
+        XCTAssertGreaterThan(root!.size, 0)
+        let names = Set(root!.children.map { $0.name })
+        XCTAssertTrue(names.contains("hello.txt"))
+        XCTAssertTrue(names.contains("world.pdf"))
+    }
+
+    func test_scanner_rolls_up_directory_size() async throws {
+        let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let sub = tmp.appendingPathComponent("subdir")
+        try FileManager.default.createDirectory(at: sub, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tmp) }
+
+        try Data(repeating: 0, count: 4096).write(to: sub.appendingPathComponent("big.bin"))
+
+        let scanner = FileScanner()
+        var root: FSNode?
+        for await progress in await scanner.scan(url: tmp) {
+            if case .completed(let node) = progress { root = node }
+        }
+
+        XCTAssertEqual(root?.size ?? 0, root?.children.first?.size ?? -1)
+    }
+
+    func test_scanner_skips_symlinks() async throws {
+        let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: tmp, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tmp) }
+
+        let real = tmp.appendingPathComponent("real.txt")
+        try "data".data(using: .utf8)!.write(to: real)
+        let link = tmp.appendingPathComponent("link.txt")
+        try FileManager.default.createSymbolicLink(at: link, withDestinationURL: real)
+
+        let scanner = FileScanner()
+        var root: FSNode?
+        for await progress in await scanner.scan(url: tmp) {
+            if case .completed(let node) = progress { root = node }
+        }
+
+        XCTAssertEqual(root?.children.count, 1, "symlink should be skipped")
+        XCTAssertEqual(root?.children.first?.name, "real.txt")
+    }
 }
