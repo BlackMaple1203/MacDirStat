@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 @MainActor
@@ -157,6 +158,26 @@ public final class ScanViewModel: ObservableObject {
     }
 
     public func exportCSV() {
-        // Implemented in Task 15
+        guard let root else { return }
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.commaSeparatedText]
+        panel.nameFieldStringValue = "\(root.name)-disk-usage.csv"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        var lines = ["Path,Size (bytes),Size,Type,Duplicate Group"]
+        appendCSV(node: root, to: &lines)
+        let csv = lines.joined(separator: "\n")
+
+        Task.detached(priority: .utility) {
+            try? csv.write(to: url, atomically: true, encoding: .utf8)
+        }
+    }
+
+    private func appendCSV(node: FSNode, to lines: inout [String]) {
+        let path = node.url.path.replacingOccurrences(of: ",", with: ";")
+        let type = node.isDirectory ? "directory" : node.fileExtension
+        let group = node.duplicateGroupID?.uuidString ?? ""
+        lines.append("\"\(path)\",\(node.size),\(ByteFormatter.string(from: node.size)),\(type),\(group)")
+        for child in node.children { appendCSV(node: child, to: &lines) }
     }
 }
