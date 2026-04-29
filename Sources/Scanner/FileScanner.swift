@@ -18,7 +18,9 @@ public actor FileScanner {
             Task { [weak self] in
                 guard let self else { return }
                 do {
-                    let root = try await self.buildTree(url: url, parent: nil, continuation: continuation)
+                    let rootRes = try url.resourceValues(forKeys: [.volumeIdentifierKey])
+                    let rootVolumeID = rootRes.volumeIdentifier
+                    let root = try await self.buildTree(url: url, parent: nil, rootVolumeID: rootVolumeID, continuation: continuation)
                     continuation.yield(.completed(root: root))
                 } catch is CancellationError {
                     // cancelled — emit nothing extra
@@ -30,11 +32,20 @@ public actor FileScanner {
         }
     }
 
-    private func buildTree(url: URL, parent: FSNode?, continuation: AsyncStream<ScanProgress>.Continuation) throws -> FSNode {
+    private static let resourceKeys: Set<URLResourceKey> = [
+        .isDirectoryKey, .isSymbolicLinkKey, .nameKey,
+        .totalFileAllocatedSizeKey, .volumeIdentifierKey
+    ]
+
+    private func buildTree(
+        url: URL,
+        parent: FSNode?,
+        rootVolumeID: (any NSCopying & NSObjectProtocol)?,
+        continuation: AsyncStream<ScanProgress>.Continuation
+    ) throws -> FSNode {
         guard !isCancelled else { throw CancellationError() }
 
-        let keys: Set<URLResourceKey> = [.isDirectoryKey, .fileSizeKey, .isSymbolicLinkKey, .nameKey]
-        let res = try url.resourceValues(forKeys: keys)
+        let res = try url.resourceValues(forKeys: Self.resourceKeys)
         guard !(res.isSymbolicLink ?? false) else { throw SkipError() }
 
         let isDir = res.isDirectory ?? false
@@ -45,19 +56,27 @@ public actor FileScanner {
         if isDir {
             let contents = (try? FileManager.default.contentsOfDirectory(
                 at: url,
-                includingPropertiesForKeys: Array(keys),
+                includingPropertiesForKeys: Array(Self.resourceKeys),
                 options: [.skipsPackageDescendants]
             )) ?? []
 
             for childURL in contents {
                 guard !isCancelled else { break }
-                if let child = try? buildTree(url: childURL, parent: node, continuation: continuation) {
+                // Skip mount points — don't follow into other filesystems
+                if let rootVolumeID,
+                   let childVol = try? childURL.resourceValues(forKeys: [.volumeIdentifierKey]).volumeIdentifier,
+                   !childVol.isEqual(rootVolumeID) {
+                    continue
+                }
+                if let child = try? buildTree(url: childURL, parent: node, rootVolumeID: rootVolumeID, continuation: continuation) {
                     node.children.append(child)
                     node.size += child.size
                 }
             }
         } else {
-            node.size = Int64(res.fileSize ?? 0)
+            // Use allocated size (actual disk blocks), not logical file size.
+            // This correctly handles sparse files (e.g. Docker.raw, VM images).
+            node.size = Int64(res.totalFileAllocatedSize ?? 0)
             bytesFound += node.size
         }
 
