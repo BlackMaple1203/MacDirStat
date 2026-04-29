@@ -154,4 +154,8 @@ public final class ScanViewModel: ObservableObject {
         }
         for child in node.children { collectExtensions(node: child, into: &groups) }
     }
+
+    public func exportCSV() {
+        // Implemented in Task 15
+    }
 }
