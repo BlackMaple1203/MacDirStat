@@ -12,32 +12,55 @@ struct SidebarView: View {
 
     var body: some View {
         List {
-            Section("Volumes") {
+            Section {
                 ForEach(volumes, id: \.path) { vol in
-                    VolumeRow(url: vol)
+                    VolumeRow(url: vol, isScanning: vm.isScanning && vm.root?.url == vol)
                         .onTapGesture { vm.scan(url: vol) }
                 }
+            } header: {
+                Label("Volumes", systemImage: "internaldrive")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
-            Section("Recent") {
-                ForEach(recentPaths, id: \.path) { url in
-                    Label(url.lastPathComponent, systemImage: "folder")
-                        .foregroundStyle(.primary)
+            if !recentPaths.isEmpty {
+                Section {
+                    ForEach(recentPaths, id: \.path) { url in
+                        HStack(spacing: 8) {
+                            Image(systemName: "clock")
+                                .foregroundStyle(.tertiary)
+                                .frame(width: 16)
+                            Text(url.lastPathComponent)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                        }
                         .onTapGesture { vm.scan(url: url) }
+                    }
+                } header: {
+                    Label("Recent", systemImage: "clock")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
 
             if vm.duplicatesReady {
-                Section("Analysis") {
+                Section {
                     NavigationLink {
                         DuplicatesView()
                     } label: {
                         Label("Duplicates", systemImage: "doc.on.doc")
+                            .foregroundStyle(.orange)
                     }
+                } header: {
+                    Label("Analysis", systemImage: "magnifyingglass")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
         .listStyle(.sidebar)
+        .animation(.easeInOut(duration: 0.3), value: vm.duplicatesReady)
         .onAppear { volumes = mountedVolumes() }
         .onChange(of: vm.root?.url) { _, url in
             guard let url else { return }
@@ -63,21 +86,57 @@ struct SidebarView: View {
 
 private struct VolumeRow: View {
     let url: URL
+    let isScanning: Bool
 
     var body: some View {
-        HStack {
-            Image(systemName: volumeIcon)
-                .foregroundStyle(.blue)
-            VStack(alignment: .leading) {
-                Text(volumeName)
-                    .font(.callout)
-                if let total = totalSpace, let free = freeSpace {
-                    Text("\(ByteFormatter.string(from: free)) free of \(ByteFormatter.string(from: total))")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 10) {
+                Image(systemName: volumeIcon)
+                    .foregroundStyle(.blue)
+                    .font(.system(size: 16, weight: .medium))
+                    .frame(width: 20)
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(volumeName)
+                        .font(.callout)
+                        .fontWeight(.medium)
+                        .lineLimit(1)
+
+                    if let total = totalSpace, let free = freeSpace {
+                        Text("\(ByteFormatter.string(from: free)) free of \(ByteFormatter.string(from: total))")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+
+                Spacer()
+
+                if isScanning {
+                    ProgressView()
+                        .controlSize(.mini)
                 }
             }
+
+            if let total = totalSpace, let free = freeSpace, total > 0 {
+                let usedFraction = min(1.0, Double(total - free) / Double(total))
+                GeometryReader { g in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(.quaternary)
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(capacityColor(fraction: usedFraction))
+                            .frame(width: max(0, g.size.width * usedFraction))
+                    }
+                }
+                .frame(height: 4)
+                .padding(.leading, 30)
+            }
         }
+        .padding(.vertical, 3)
+    }
+
+    private func capacityColor(fraction: Double) -> Color {
+        fraction > 0.9 ? .red : fraction > 0.75 ? .orange : .blue
     }
 
     private var volumeName: String {
@@ -85,8 +144,8 @@ private struct VolumeRow: View {
     }
 
     private var volumeIcon: String {
-        let isRemovable = (try? url.resourceValues(forKeys: [.volumeIsRemovableKey]).volumeIsRemovable) ?? false
-        return isRemovable ? "externaldrive" : "internaldrive"
+        let removable = (try? url.resourceValues(forKeys: [.volumeIsRemovableKey]).volumeIsRemovable) ?? false
+        return removable ? "externaldrive" : "internaldrive"
     }
 
     private var totalSpace: Int64? {

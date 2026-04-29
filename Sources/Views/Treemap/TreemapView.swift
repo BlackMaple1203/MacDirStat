@@ -7,6 +7,9 @@ struct TreemapView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
+                // Background
+                Color(nsColor: .windowBackgroundColor)
+
                 Canvas { context, size in
                     TreemapRenderer.draw(
                         cells: vm.cells,
@@ -51,36 +54,52 @@ struct TreemapView: View {
                     }
                 }
 
+                // Scanning overlay spinner (top-right corner)
+                if vm.isScanning {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            HStack(spacing: 6) {
+                                ProgressView()
+                                    .controlSize(.small)
+                                Text("Scanning…")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
+                            .padding(12)
+                        }
+                        Spacer()
+                    }
+                    .transition(.opacity)
+                    .allowsHitTesting(false)
+                }
+
                 // Hover tooltip
                 if let cell = hoveredCell {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(cell.node.name).fontWeight(.semibold)
-                        Text(ByteFormatter.string(from: cell.node.size)).foregroundStyle(.secondary)
-                        Text(cell.node.url.path)
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
-                            .lineLimit(2)
-                    }
-                    .padding(8)
-                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
-                    .shadow(radius: 4)
-                    .padding(8)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-                    .allowsHitTesting(false)
+                    HoverTooltip(node: cell.node)
+                        .padding(12)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                        .allowsHitTesting(false)
+                        .transition(.opacity.animation(.easeInOut(duration: 0.1)))
                 }
 
                 // Empty state
                 if vm.cells.isEmpty && !vm.isScanning {
                     ContentUnavailableView(
-                        "No Data",
+                        vm.root == nil ? "Open a Folder" : "Nothing to Display",
                         systemImage: "square.3.layers.3d",
-                        description: Text(vm.root == nil ? "Open a folder to begin" : "Nothing to display")
+                        description: Text(vm.root == nil ? "Drag a folder here or click Open Folder" : "The selected folder appears to be empty")
                     )
                 }
             }
+            .clipShape(Rectangle())
             .onChange(of: geo.size) { _, size in vm.updateLayoutSize(size) }
             .onAppear { vm.updateLayoutSize(geo.size) }
         }
+        .animation(.easeInOut(duration: 0.2), value: vm.isScanning)
     }
 
     private func moveToTrash(node: FSNode) {
@@ -91,5 +110,40 @@ struct TreemapView: View {
         } catch {
             // silently ignore — file may already be gone
         }
+    }
+}
+
+private struct HoverTooltip: View {
+    let node: FSNode
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: FileTypeIcon.systemName(for: node))
+                .foregroundStyle(FileTypeIcon.color(for: node))
+                .font(.system(size: 22))
+                .frame(width: 28)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(node.name)
+                    .font(.system(.body, weight: .semibold))
+                    .lineLimit(1)
+
+                Label(ByteFormatter.string(from: node.size), systemImage: "internaldrive")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+
+                Text(node.url.path)
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(2)
+                    .truncationMode(.middle)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(maxWidth: 340)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .shadow(color: .black.opacity(0.18), radius: 10, x: 0, y: 4)
     }
 }
