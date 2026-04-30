@@ -54,8 +54,8 @@ struct TreemapView: View {
                     }
                 }
 
-                // Scanning overlay spinner (top-right corner)
-                if vm.isScanning {
+                // Scanning / layout-computing overlay spinner (top-right corner)
+                if vm.isScanning || vm.isComputingLayout {
                     VStack {
                         HStack {
                             Spacer()

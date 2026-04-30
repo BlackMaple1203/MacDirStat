@@ -15,8 +15,11 @@ struct SidebarView: View {
         List {
             Section {
                 ForEach(volumes, id: \.path) { vol in
-                    VolumeRow(url: vol, isScanning: vm.isScanning && vm.root?.url == vol)
-                        .onTapGesture { vm.scan(url: vol) }
+                    VolumeRow(url: vol, isScanning: (vm.isScanning || vm.isComputingLayout) && vm.root?.url.path == vol.path)
+                        .onTapGesture {
+                            guard vm.root?.url.path != vol.path else { return }
+                            vm.scan(url: vol)
+                        }
                 }
             } header: {
                 Label("Volumes", systemImage: "internaldrive")
@@ -35,7 +38,10 @@ struct SidebarView: View {
                                 .lineLimit(1)
                                 .truncationMode(.middle)
                         }
-                        .onTapGesture { vm.scan(url: url) }
+                        .onTapGesture {
+                            guard vm.root?.url.path != url.path else { return }
+                            vm.scan(url: url)
+                        }
                     }
                 } header: {
                     Label("Recent", systemImage: "clock")

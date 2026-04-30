@@ -31,13 +31,18 @@ struct ContentView: View {
             }
 
             ToolbarItemGroup(placement: .primaryAction) {
-                if vm.isScanning {
+                if vm.isScanning || vm.isComputingLayout {
                     HStack(spacing: 6) {
                         ProgressView().controlSize(.small)
-                        Text("\(vm.itemsScanned) items")
-                            .font(.caption).foregroundStyle(.secondary).monospacedDigit()
-                        Button("Cancel") { vm.cancelScan() }
-                            .foregroundStyle(.red)
+                        if vm.isScanning {
+                            Text("\(vm.itemsScanned) items")
+                                .font(.caption).foregroundStyle(.secondary).monospacedDigit()
+                            Button("Cancel") { vm.cancelScan() }
+                                .foregroundStyle(.red)
+                        } else {
+                            Text("Building treemap…")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
                     }
                     .transition(.opacity)
                 } else {
@@ -46,7 +51,7 @@ struct ContentView: View {
                 }
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: vm.isScanning)
+        .animation(.easeInOut(duration: 0.2), value: vm.isScanning || vm.isComputingLayout)
         .onReceive(NotificationCenter.default.publisher(for: .exportCSV)) { _ in
             vm.exportCSV()
         }
@@ -54,7 +59,7 @@ struct ContentView: View {
 
     @ViewBuilder
     private var detailContent: some View {
-        if vm.root == nil && !vm.isScanning {
+        if vm.root == nil && !vm.isScanning && !vm.isComputingLayout {
             // Single beautiful empty state — no split panels
             WelcomeView()
         } else {
@@ -70,11 +75,11 @@ struct ContentView: View {
                     Divider()
                     ExtensionListView()
                         .frame(minHeight: 120, idealHeight: 180, maxHeight: 280)
-                } else if vm.isScanning {
+                } else if vm.isScanning || vm.isComputingLayout {
                     Divider()
                     HStack(spacing: 8) {
                         ProgressView().controlSize(.small)
-                        Text("Scanning extensions…")
+                        Text(vm.isScanning ? "Scanning…" : "Building treemap…")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity)

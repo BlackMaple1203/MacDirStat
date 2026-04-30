@@ -14,17 +14,20 @@ public final class ScanViewModel: ObservableObject {
     @Published public var duplicatesReady: Bool = false
     @Published public var drillStack: [FSNode] = []
     @Published public var highlightedExtension: String?
+    @Published public var isComputingLayout: Bool = false
 
     public var treemapRoot: FSNode? { drillStack.last ?? root }
 
     private let scanner = FileScanner()
     private var scanTask: Task<Void, Never>?
     private var layoutSize: CGSize = .zero
+    private var layoutGeneration: Int = 0
 
     public init() {}
 
     public func scan(url: URL) {
         scanTask?.cancel()
+        layoutGeneration += 1       // invalidate any in-progress layout
         root = nil
         cells = []
         colorMap = nil
@@ -33,6 +36,7 @@ public final class ScanViewModel: ObservableObject {
         highlightedExtension = nil
         drillStack = []
         isScanning = true
+        isComputingLayout = false
         errorMessage = nil
 
         scanTask = Task {
@@ -44,9 +48,11 @@ public final class ScanViewModel: ObservableObject {
                 case .completed(let node):
                     self.root = node
                     self.isScanning = false
+                    self.isComputingLayout = true   // keep spinner until treemap is ready
                     let map = ExtensionColorMap(root: node)
                     self.colorMap = map
                     await self.recomputeLayout()
+                    // isComputingLayout set to false inside recomputeLayout
                     Task.detached(priority: .utility) { [node] in
                         let detector = DuplicateDetector()
                         await detector.detect(in: node)
@@ -55,6 +61,7 @@ public final class ScanViewModel: ObservableObject {
                 case .failed(let msg):
                     self.errorMessage = msg
                     self.isScanning = false
+                    self.isComputingLayout = false
                 }
             }
         }
@@ -63,7 +70,9 @@ public final class ScanViewModel: ObservableObject {
     public func cancelScan() {
         Task { await scanner.cancel() }
         scanTask?.cancel()
+        layoutGeneration += 1
         isScanning = false
+        isComputingLayout = false
     }
 
     public func updateLayoutSize(_ size: CGSize) {
@@ -136,11 +145,17 @@ public final class ScanViewModel: ObservableObject {
     private func recomputeLayout() async {
         guard let displayRoot = treemapRoot, let map = colorMap,
               layoutSize.width > 1, layoutSize.height > 1 else { return }
+        layoutGeneration += 1
+        let myGen = layoutGeneration
+        isComputingLayout = true
         let rect = CGRect(origin: .zero, size: layoutSize)
         let computed = await Task.detached(priority: .userInitiated) {
             TreemapLayout.compute(root: displayRoot, in: rect, colorMap: map)
         }.value
+        // Discard result if a newer layout was requested while we were computing
+        guard myGen == layoutGeneration else { return }
         self.cells = computed
+        self.isComputingLayout = false
     }
 
     private func collectAll(node: FSNode, into list: inout [FSNode]) {
