@@ -37,6 +37,8 @@ struct ContentView: View {
                         if vm.isScanning {
                             Text("\(vm.itemsScanned) items")
                                 .font(.caption).foregroundStyle(.secondary).monospacedDigit()
+                            Text(ByteFormatter.string(from: vm.bytesFound))
+                                .font(.caption).foregroundStyle(.secondary).monospacedDigit()
                             Button("Cancel") { vm.cancelScan() }
                                 .foregroundStyle(.red)
                         } else {

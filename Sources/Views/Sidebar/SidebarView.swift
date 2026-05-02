@@ -15,7 +15,7 @@ struct SidebarView: View {
         List {
             Section {
                 ForEach(volumes, id: \.path) { vol in
-                    VolumeRow(url: vol, isScanning: (vm.isScanning || vm.isComputingLayout) && vm.root?.url.path == vol.path)
+                    VolumeRow(url: vol, isScanning: (vm.isScanning || vm.isComputingLayout) && vm.scanURL?.path == vol.path)
                         .onTapGesture {
                             guard vm.root?.url.path != vol.path else { return }
                             vm.scan(url: vol)

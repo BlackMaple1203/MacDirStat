@@ -15,6 +15,7 @@ public final class ScanViewModel: ObservableObject {
     @Published public var drillStack: [FSNode] = []
     @Published public var highlightedExtension: String?
     @Published public var isComputingLayout: Bool = false
+    @Published public var scanURL: URL?
 
     public var treemapRoot: FSNode? { drillStack.last ?? root }
 
@@ -28,6 +29,7 @@ public final class ScanViewModel: ObservableObject {
     public func scan(url: URL) {
         scanTask?.cancel()
         layoutGeneration += 1       // invalidate any in-progress layout
+        scanURL = url
         root = nil
         cells = []
         colorMap = nil
@@ -36,6 +38,8 @@ public final class ScanViewModel: ObservableObject {
         highlightedExtension = nil
         drillStack = []
         isScanning = true
+        itemsScanned = 0
+        bytesFound = 0
         isComputingLayout = false
         errorMessage = nil
 
@@ -73,6 +77,7 @@ public final class ScanViewModel: ObservableObject {
         layoutGeneration += 1
         isScanning = false
         isComputingLayout = false
+        scanURL = nil
     }
 
     public func updateLayoutSize(_ size: CGSize) {

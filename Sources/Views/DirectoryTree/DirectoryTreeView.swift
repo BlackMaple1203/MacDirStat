@@ -7,28 +7,52 @@ struct DirectoryTreeView: View {
         Group {
             if let root = vm.root {
                 List(root.children.sorted { $0.size > $1.size }, children: \.optionalChildren) { node in
-                    NodeRow(node: node)
+                    NodeRow(node: node, isSelected: vm.selectedNode?.id == node.id)
+                        .contentShape(Rectangle())
                         .onTapGesture { vm.select(node) }
                         .contextMenu {
-                            Button("Reveal in Finder") {
+                            Text(node.name).fontWeight(.semibold)
+                            Text(ByteFormatter.string(from: node.size))
+                                .foregroundStyle(.secondary)
+                            Divider()
+                            Button {
                                 NSWorkspace.shared.activateFileViewerSelecting([node.url])
+                            } label: {
+                                Label("Reveal in Finder", systemImage: "folder.badge.magnifyingglass")
                             }
-                            Button("Copy Path") {
+                            Button {
                                 NSPasteboard.general.clearContents()
                                 NSPasteboard.general.setString(node.url.path, forType: .string)
+                            } label: {
+                                Label("Copy Path", systemImage: "doc.on.clipboard")
+                            }
+                            Button {
+                                NSPasteboard.general.clearContents()
+                                NSPasteboard.general.setString(node.name, forType: .string)
+                            } label: {
+                                Label("Copy Name", systemImage: "textformat")
+                            }
+                            if node.isDirectory {
+                                Divider()
+                                Button {
+                                    vm.drillDown(into: node)
+                                } label: {
+                                    Label("Open in Chart", systemImage: "arrow.down.right.circle")
+                                }
                             }
                             Divider()
-                            Button("Move to Trash", role: .destructive) {
+                            Button(role: .destructive) {
                                 if let _ = try? FileManager.default.trashItem(at: node.url, resultingItemURL: nil),
                                    let root = vm.root {
                                     vm.scan(url: root.url)
                                 }
+                            } label: {
+                                Label("Move to Trash", systemImage: "trash")
                             }
                         }
                 }
                 .listStyle(.inset)
             } else {
-                // Scanning in progress — root not yet available
                 ScanningPlaceholder(items: vm.itemsScanned, bytes: vm.bytesFound)
             }
         }
@@ -41,14 +65,11 @@ private struct ScanningPlaceholder: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            ProgressView()
-                .scaleEffect(1.3)
+            ProgressView().scaleEffect(1.3)
             VStack(spacing: 4) {
-                Text("Scanning…")
-                    .font(.headline)
+                Text("Scanning…").font(.headline)
                 Text("\(items) items · \(ByteFormatter.string(from: bytes))")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.subheadline).foregroundStyle(.secondary)
                     .monospacedDigit()
                     .contentTransition(.numericText())
                     .animation(.easeOut, value: items)
@@ -60,6 +81,7 @@ private struct ScanningPlaceholder: View {
 
 private struct NodeRow: View {
     let node: FSNode
+    let isSelected: Bool
 
     var body: some View {
         HStack(spacing: 10) {
@@ -72,14 +94,18 @@ private struct NodeRow: View {
                 Text(node.name)
                     .font(.body)
                     .lineLimit(1)
+                    .foregroundStyle(isSelected ? .white : .primary)
 
                 if !node.isDirectory, !node.fileExtension.isEmpty {
                     Text(".\(node.fileExtension)".uppercased())
                         .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(isSelected ? Color.white.opacity(0.75) : Color.secondary.opacity(0.6))
                         .padding(.horizontal, 4)
                         .padding(.vertical, 1)
-                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 3))
+                        .background(
+                            isSelected ? Color.white.opacity(0.20) : Color.gray.opacity(0.15),
+                            in: RoundedRectangle(cornerRadius: 3)
+                        )
                 }
             }
 
@@ -88,18 +114,25 @@ private struct NodeRow: View {
             VStack(alignment: .trailing, spacing: 1) {
                 Text(ByteFormatter.string(from: node.size))
                     .font(.system(.callout, design: .monospaced))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(isSelected ? .white : .primary)
                     .monospacedDigit()
 
                 if let pct = percentageOfParent {
                     Text(pct)
                         .font(.caption2)
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(isSelected ? Color.white.opacity(0.75) : Color.secondary.opacity(0.6))
                         .monospacedDigit()
                 }
             }
         }
         .padding(.vertical, 2)
+        .padding(.horizontal, 6)
+        .background(
+            isSelected
+                ? Color.accentColor.opacity(0.85)
+                : Color.clear,
+            in: RoundedRectangle(cornerRadius: 6)
+        )
     }
 
     private var percentageOfParent: String? {
