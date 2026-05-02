@@ -10,6 +10,9 @@ struct MacDirStatApp: App {
                 .environmentObject(vm)
         }
         .defaultSize(width: 1200, height: 800)
+        Settings {
+            SettingsView()
+        }
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("Open Folder…") {

@@ -9,10 +9,14 @@ final class HapticEngine {
     private let p = NSHapticFeedbackManager.defaultPerformer
     private var lastID: UUID?
 
+    private var isEnabled: Bool {
+        UserDefaults.standard.object(forKey: "hapticFeedbackEnabled") as? Bool ?? true
+    }
+
     // ── Hover ────────────────────────────────────────────────────────────────
 
     func hoverEntered(_ node: FSNode) {
-        guard node.id != lastID else { return }
+        guard isEnabled, node.id != lastID else { return }
         lastID = node.id
 
         let (pattern, taps) = feedback(for: node)
@@ -27,16 +31,19 @@ final class HapticEngine {
 
     /// Drill into a directory.
     func drillIn() {
+        guard isEnabled else { return }
         fire(pattern: .levelChange, times: 1)
     }
 
     /// Navigate back out.
     func drillOut() {
+        guard isEnabled else { return }
         fire(pattern: .generic, times: 1)
     }
 
     /// Select a file.
     func select() {
+        guard isEnabled else { return }
         fire(pattern: .alignment, times: 1)
     }
 

@@ -3,7 +3,12 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject private var vm: ScanViewModel
     @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
-    @State private var showTree = true
+    /// Persisted user preference — survives relaunches and drill actions.
+    @AppStorage("showFileTree") private var userWantsTree = true
+    /// True only while an initial scan is running (temporary, never persisted).
+    @State private var scanHidesTree = false
+
+    private var showTree: Bool { userWantsTree && !scanHidesTree }
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -35,9 +40,9 @@ struct ContentView: View {
                 // Tree panel toggle — only show when there's something to display
                 if vm.root != nil {
                     Button {
-                        withAnimation(.easeInOut(duration: 0.2)) { showTree.toggle() }
+                        withAnimation(.easeInOut(duration: 0.2)) { userWantsTree.toggle() }
                     } label: {
-                        Image(systemName: showTree ? "sidebar.left" : "sidebar.left")
+                        Image(systemName: "sidebar.left")
                             .symbolVariant(showTree ? .none : .slash)
                     }
                     .help(showTree ? "Hide file list" : "Show file list")
@@ -65,12 +70,10 @@ struct ContentView: View {
                 }
             }
         }
-        // Auto-hide tree while scanning so the chart gets full width
+        // Temporarily hide tree while scanning; restore to user preference when done.
+        // Does NOT touch the scan when drilling — layout recomputes don't reset the panel.
         .onChange(of: vm.isScanning) { _, scanning in
-            if scanning { withAnimation { showTree = false } }
-        }
-        .onChange(of: vm.isComputingLayout) { _, computing in
-            if !computing, vm.root != nil { withAnimation { showTree = true } }
+            withAnimation(.easeInOut(duration: 0.2)) { scanHidesTree = scanning }
         }
         .animation(.easeInOut(duration: 0.2), value: vm.isScanning || vm.isComputingLayout)
         .onReceive(NotificationCenter.default.publisher(for: .exportCSV)) { _ in
