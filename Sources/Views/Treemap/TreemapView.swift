@@ -53,9 +53,16 @@ struct TreemapView: View {
                 switch phase {
                 case .active(let loc):
                     cursorPos = loc
-                    hoveredCell = TreemapRenderer.cell(at: loc, center: chartCenter, in: vm.cells)
+                    let newCell = TreemapRenderer.cell(at: loc, center: chartCenter, in: vm.cells)
+                    if newCell?.node.id != hoveredCell?.node.id {
+                        hoveredCell = newCell
+                        if let node = newCell?.node {
+                            HapticEngine.shared.hoverEntered(node)
+                        }
+                    }
                 case .ended:
                     hoveredCell = nil
+                    HapticEngine.shared.hoverExited()
                 }
             }
             .gesture(
@@ -108,15 +115,18 @@ struct TreemapView: View {
 
         if TreemapRenderer.isInCenter(point: loc, center: c) {
             guard !vm.drillStack.isEmpty else { return }
+            HapticEngine.shared.drillOut()
             withAnimation(.easeInOut(duration: 0.22)) { drillGeneration += 1 }
             vm.drillUp()
             return
         }
         guard let cell = TreemapRenderer.cell(at: loc, center: c, in: vm.cells) else { return }
         if cell.node.isDirectory {
+            HapticEngine.shared.drillIn()
             withAnimation(.easeInOut(duration: 0.22)) { drillGeneration += 1 }
             vm.drillDown(into: cell.node)
         } else {
+            HapticEngine.shared.select()
             vm.select(cell.node)
         }
     }
@@ -160,6 +170,7 @@ struct TreemapView: View {
             if node.isDirectory {
                 Divider()
                 Button {
+                    HapticEngine.shared.drillIn()
                     withAnimation(.easeInOut(duration: 0.22)) { drillGeneration += 1 }
                     vm.drillDown(into: node)
                 } label: {
