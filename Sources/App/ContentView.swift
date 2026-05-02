@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject private var vm: ScanViewModel
     @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
+    @State private var showTree = true
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
@@ -31,6 +32,17 @@ struct ContentView: View {
             }
 
             ToolbarItemGroup(placement: .primaryAction) {
+                // Tree panel toggle — only show when there's something to display
+                if vm.root != nil {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { showTree.toggle() }
+                    } label: {
+                        Image(systemName: showTree ? "sidebar.left" : "sidebar.left")
+                            .symbolVariant(showTree ? .none : .slash)
+                    }
+                    .help(showTree ? "Hide file list" : "Show file list")
+                }
+
                 if vm.isScanning || vm.isComputingLayout {
                     HStack(spacing: 6) {
                         ProgressView().controlSize(.small)
@@ -53,6 +65,13 @@ struct ContentView: View {
                 }
             }
         }
+        // Auto-hide tree while scanning so the chart gets full width
+        .onChange(of: vm.isScanning) { _, scanning in
+            if scanning { withAnimation { showTree = false } }
+        }
+        .onChange(of: vm.isComputingLayout) { _, computing in
+            if !computing, vm.root != nil { withAnimation { showTree = true } }
+        }
         .animation(.easeInOut(duration: 0.2), value: vm.isScanning || vm.isComputingLayout)
         .onReceive(NotificationCenter.default.publisher(for: .exportCSV)) { _ in
             vm.exportCSV()
@@ -62,15 +81,18 @@ struct ContentView: View {
     @ViewBuilder
     private var detailContent: some View {
         if vm.root == nil && !vm.isScanning && !vm.isComputingLayout {
-            // Single beautiful empty state — no split panels
             WelcomeView()
         } else {
             VStack(spacing: 0) {
-                HSplitView {
-                    DirectoryTreeView()
-                        .frame(minWidth: 240, idealWidth: 320)
+                if showTree {
+                    HSplitView {
+                        DirectoryTreeView()
+                            .frame(minWidth: 220, idealWidth: 300)
+                        TreemapView()
+                            .frame(minWidth: 300)
+                    }
+                } else {
                     TreemapView()
-                        .frame(minWidth: 300)
                 }
 
                 Divider()

@@ -84,59 +84,64 @@ private struct NodeRow: View {
     let isSelected: Bool
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 6) {
+            // Icon
             Image(systemName: FileTypeIcon.systemName(for: node))
                 .foregroundStyle(FileTypeIcon.color(for: node))
-                .font(.system(size: 14))
-                .frame(width: 18, alignment: .center)
+                .font(.system(size: 12))
+                .frame(width: 14, alignment: .center)
 
-            VStack(alignment: .leading, spacing: 1) {
-                Text(node.name)
-                    .font(.body)
-                    .lineLimit(1)
-                    .foregroundStyle(isSelected ? .white : .primary)
+            // Name — takes all available space, tail-truncated
+            Text(node.name)
+                .font(.system(size: 12.5))
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .foregroundStyle(isSelected ? .white : .primary)
 
-                if !node.isDirectory, !node.fileExtension.isEmpty {
-                    Text(".\(node.fileExtension)".uppercased())
-                        .font(.system(size: 9, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(isSelected ? Color.white.opacity(0.75) : Color.secondary.opacity(0.6))
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 1)
-                        .background(
-                            isSelected ? Color.white.opacity(0.20) : Color.gray.opacity(0.15),
-                            in: RoundedRectangle(cornerRadius: 3)
-                        )
-                }
+            // Inline extension badge for files
+            if !node.isDirectory, !node.fileExtension.isEmpty {
+                Text(node.fileExtension.uppercased())
+                    .font(.system(size: 7.5, weight: .bold, design: .monospaced))
+                    .foregroundStyle(isSelected ? Color.white.opacity(0.65) : Color.secondary.opacity(0.5))
+                    .padding(.horizontal, 3)
+                    .padding(.vertical, 1.5)
+                    .background(
+                        isSelected ? Color.white.opacity(0.15) : Color.primary.opacity(0.07),
+                        in: RoundedRectangle(cornerRadius: 3)
+                    )
+                    .fixedSize()
             }
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 4)
 
-            VStack(alignment: .trailing, spacing: 1) {
-                Text(ByteFormatter.string(from: node.size))
-                    .font(.system(.callout, design: .monospaced))
-                    .foregroundStyle(isSelected ? .white : .primary)
-                    .monospacedDigit()
+            // Size
+            Text(ByteFormatter.string(from: node.size))
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundStyle(isSelected ? Color.white.opacity(0.9) : .primary)
+                .monospacedDigit()
+                .lineLimit(1)
+                .fixedSize()
 
-                if let pct = percentageOfParent {
-                    Text(pct)
-                        .font(.caption2)
-                        .foregroundStyle(isSelected ? Color.white.opacity(0.75) : Color.secondary.opacity(0.6))
-                        .monospacedDigit()
-                }
-            }
+            // Percentage of parent — fixed width so sizes stay aligned
+            Text(percentageOfParent ?? "")
+                .font(.system(size: 10))
+                .foregroundStyle(isSelected ? Color.white.opacity(0.55) : Color.secondary.opacity(0.65))
+                .monospacedDigit()
+                .frame(width: 36, alignment: .trailing)
+                .lineLimit(1)
+                .opacity(percentageOfParent == nil ? 0 : 1)
         }
-        .padding(.vertical, 2)
-        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .padding(.horizontal, 4)
         .background(
-            isSelected
-                ? Color.accentColor.opacity(0.85)
-                : Color.clear,
-            in: RoundedRectangle(cornerRadius: 6)
+            isSelected ? Color.accentColor.opacity(0.85) : Color.clear,
+            in: RoundedRectangle(cornerRadius: 5)
         )
     }
 
     private var percentageOfParent: String? {
         guard let parentSize = node.parent?.size, parentSize > 0 else { return nil }
-        return String(format: "%.1f%%", Double(node.size) / Double(parentSize) * 100)
+        let pct = Double(node.size) / Double(parentSize) * 100
+        return pct >= 10 ? String(format: "%.0f%%", pct) : String(format: "%.1f%%", pct)
     }
 }
