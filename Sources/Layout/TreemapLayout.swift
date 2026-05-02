@@ -7,20 +7,19 @@ private extension Color {
         let ns = NSColor(self).usingColorSpace(.deviceRGB) ?? NSColor(self)
         var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         ns.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
-        return Color(hue: Double(h), saturation: Double(s), brightness: max(0, Double(b) - fraction), opacity: Double(a))
+        return Color(hue: Double(h), saturation: Double(s),
+                     brightness: max(0, Double(b) - fraction), opacity: Double(a))
     }
 }
 
 public struct TreemapLayout {
 
-    /// Radius of the empty center hole (shows current directory info)
     static let centerRadius: CGFloat = 76
-    /// Max number of depth rings shown
     private static let maxDepth = 5
-    /// Skip arcs smaller than this angle (avoids invisible slivers)
-    private static let minArcAngle: Double = 0.018  // ~1.0°
-    /// Darkening per depth level (squirreldisk-style, capped at 0.48)
-    private static let depthDarken: [Double] = [0.0, 0.18, 0.30, 0.40, 0.48, 0.54]
+    private static let minArcAngle: Double = 0.018
+
+    // Gentle per-depth darkening so deep files stay recognisable
+    private static let depthDarken: [Double] = [0.0, 0.10, 0.18, 0.26, 0.32, 0.38]
 
     public static func compute(root: FSNode, in rect: CGRect, colorMap: ExtensionColorMap) -> [TreemapCell] {
         var cells: [TreemapCell] = []
@@ -29,22 +28,15 @@ public struct TreemapLayout {
         let children = root.children.filter { $0.size > 0 }.sorted { $0.size > $1.size }
         guard !children.isEmpty else { return cells }
 
-        // Compute band width so the sunburst fills the view
         let maxR = min(rect.width, rect.height) / 2 - 10
         guard maxR > centerRadius + 20 else { return cells }
         let bandW = (maxR - centerRadius) / CGFloat(maxDepth)
 
-        // Assign a unique rainbow hue to each top-level child
-        var topColors: [UUID: Color] = [:]
-        let n = max(children.count, 1)
-        for (i, child) in children.enumerated() {
-            let hue = Double(i) / Double(n)
-            topColors[child.id] = Color(hue: hue, saturation: 0.72, brightness: 0.92)
-        }
-
-        layout(children, parentStart: -.pi / 2, parentEnd: 1.5 * .pi,
-               depth: 0, groupColor: nil, topColors: topColors,
-               centerR: centerRadius, bandW: bandW, cells: &cells)
+        layout(children,
+               parentStart: -.pi / 2, parentEnd: 1.5 * .pi,
+               depth: 0, colorMap: colorMap,
+               centerR: centerRadius, bandW: bandW,
+               cells: &cells)
         return cells
     }
 
@@ -53,8 +45,7 @@ public struct TreemapLayout {
         parentStart: Double,
         parentEnd: Double,
         depth: Int,
-        groupColor: Color?,
-        topColors: [UUID: Color],
+        colorMap: ExtensionColorMap,
         centerR: CGFloat,
         bandW: CGFloat,
         cells: inout [TreemapCell]
@@ -66,22 +57,18 @@ public struct TreemapLayout {
 
         let totalAngle = parentEnd - parentStart
         let innerR = centerR + CGFloat(depth) * bandW
-        // 3pt radial gap between bands (matches squirreldisk's `d.y1 * radius - 3`)
-        let outerR = innerR + bandW - 3
+        let outerR = innerR + bandW - 3   // 3 pt radial gap between bands
 
         var angle = parentStart
 
         for child in children {
             let fraction = Double(child.size) / Double(totalSize)
             let arcAngle = fraction * totalAngle
-            let arcEnd = angle + arcAngle
+            let arcEnd   = angle + arcAngle
 
             guard arcAngle >= minArcAngle else { angle = arcEnd; continue }
 
-            // Resolve color: top-level uses rainbow hue, children inherit parent hue with darkening
-            let baseColor = groupColor ?? topColors[child.id] ?? Color(hue: 0, saturation: 0.72, brightness: 0.92)
-            let darken = depth < depthDarken.count ? depthDarken[depth] : 0.54
-            let cellColor = darken > 0 ? baseColor.darkened(by: darken) : baseColor
+            let cellColor = color(for: child, depth: depth, colorMap: colorMap)
 
             cells.append(TreemapCell(
                 node: child,
@@ -93,14 +80,34 @@ public struct TreemapLayout {
                 depth: depth
             ))
 
-            if child.isDirectory && !child.children.isEmpty {
+            if child.isDirectory, !child.children.isEmpty {
                 let sorted = child.children.filter { $0.size > 0 }.sorted { $0.size > $1.size }
-                layout(sorted, parentStart: angle, parentEnd: arcEnd,
-                       depth: depth + 1, groupColor: baseColor,
-                       topColors: topColors, centerR: centerR, bandW: bandW, cells: &cells)
+                layout(sorted,
+                       parentStart: angle, parentEnd: arcEnd,
+                       depth: depth + 1, colorMap: colorMap,
+                       centerR: centerR, bandW: bandW,
+                       cells: &cells)
             }
 
             angle = arcEnd
+        }
+    }
+
+    // ── Color assignment ─────────────────────────────────────────────────────
+
+    private static func color(for node: FSNode, depth: Int, colorMap: ExtensionColorMap) -> Color {
+        if node.isDirectory {
+            // Directories: muted tinted containers — hue from name hash, low saturation
+            let hash = abs(node.name.hashValue) % 360
+            let hue  = Double(hash) / 360.0
+            let fade = Double(depth) * 0.05
+            return Color(hue: hue,
+                         saturation: max(0.12, 0.28 - fade),
+                         brightness: max(0.30, 0.55 - fade))
+        } else {
+            let base   = colorMap.color(for: node.fileExtension)
+            let darken = depth < depthDarken.count ? depthDarken[depth] : 0.38
+            return darken > 0 ? base.darkened(by: darken) : base
         }
     }
 }
