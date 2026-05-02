@@ -73,21 +73,9 @@ struct ContentView: View {
                         .frame(minWidth: 300)
                 }
 
-                if !vm.extensionSummaries.isEmpty {
-                    Divider()
-                    ExtensionListView()
-                        .frame(minHeight: 120, idealHeight: 180, maxHeight: 280)
-                } else if vm.isScanning || vm.isComputingLayout {
-                    Divider()
-                    HStack(spacing: 8) {
-                        ProgressView().controlSize(.small)
-                        Text(vm.isScanning ? "Scanning…" : "Building treemap…")
-                            .font(.caption).foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 44)
-                    .background(Color(nsColor: .windowBackgroundColor))
-                }
+                Divider()
+                ExtensionListView()
+                    .frame(height: 84)
             }
         }
     }

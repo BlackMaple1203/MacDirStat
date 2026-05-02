@@ -16,6 +16,8 @@ public final class ScanViewModel: ObservableObject {
     @Published public var highlightedExtension: String?
     @Published public var isComputingLayout: Bool = false
     @Published public var scanURL: URL?
+    @Published public var extensionSummaries: [ExtensionSummary] = []
+    @Published public var duplicateGroups: [[FSNode]] = []
 
     public var treemapRoot: FSNode? { drillStack.last ?? root }
 
@@ -37,6 +39,8 @@ public final class ScanViewModel: ObservableObject {
         duplicatesReady = false
         highlightedExtension = nil
         drillStack = []
+        extensionSummaries = []
+        duplicateGroups = []
         isScanning = true
         itemsScanned = 0
         bytesFound = 0
@@ -55,12 +59,17 @@ public final class ScanViewModel: ObservableObject {
                     self.isComputingLayout = true   // keep spinner until treemap is ready
                     let map = ExtensionColorMap(root: node)
                     self.colorMap = map
+                    self.extensionSummaries = Self.buildExtensionSummaries(root: node, map: map)
                     await self.recomputeLayout()
                     // isComputingLayout set to false inside recomputeLayout
                     Task.detached(priority: .utility) { [node] in
                         let detector = DuplicateDetector()
                         await detector.detect(in: node)
-                        await MainActor.run { self.duplicatesReady = true }
+                        let groups = Self.buildDuplicateGroups(root: node)
+                        await MainActor.run {
+                            self.duplicatesReady = true
+                            self.duplicateGroups = groups
+                        }
                     }
                 case .failed(let msg):
                     self.errorMessage = msg
@@ -106,8 +115,7 @@ public final class ScanViewModel: ObservableObject {
         highlightedExtension = ext
     }
 
-    public var duplicateGroups: [[FSNode]] {
-        guard let root else { return [] }
+    private nonisolated static func buildDuplicateGroups(root: FSNode) -> [[FSNode]] {
         var all: [FSNode] = []
         collectAll(node: root, into: &all)
         let grouped = Dictionary(grouping: all.filter { $0.duplicateGroupID != nil }) { $0.duplicateGroupID! }
@@ -129,8 +137,7 @@ public final class ScanViewModel: ObservableObject {
         public let percentage: Double
     }
 
-    public var extensionSummaries: [ExtensionSummary] {
-        guard let root, let map = colorMap else { return [] }
+    private nonisolated static func buildExtensionSummaries(root: FSNode, map: ExtensionColorMap) -> [ExtensionSummary] {
         var groups: [String: (count: Int, size: Int64)] = [:]
         collectExtensions(node: root, into: &groups)
         let total = Double(root.size)
@@ -163,12 +170,12 @@ public final class ScanViewModel: ObservableObject {
         self.isComputingLayout = false
     }
 
-    private func collectAll(node: FSNode, into list: inout [FSNode]) {
+    private nonisolated static func collectAll(node: FSNode, into list: inout [FSNode]) {
         list.append(node)
         for child in node.children { collectAll(node: child, into: &list) }
     }
 
-    private func collectExtensions(node: FSNode, into groups: inout [String: (count: Int, size: Int64)]) {
+    private nonisolated static func collectExtensions(node: FSNode, into groups: inout [String: (count: Int, size: Int64)]) {
         if !node.isDirectory {
             let key = node.fileExtension
             groups[key, default: (0, 0)].count += 1
