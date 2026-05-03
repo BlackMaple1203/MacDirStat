@@ -59,9 +59,15 @@ public final class ScanViewModel: ObservableObject {
                     self.isComputingLayout = true   // keep spinner until treemap is ready
                     let map = ExtensionColorMap(root: node)
                     self.colorMap = map
-                    self.extensionSummaries = Self.buildExtensionSummaries(root: node, map: map)
                     await self.recomputeLayout()
                     // isComputingLayout set to false inside recomputeLayout
+
+                    // Extension summaries: potentially millions of nodes — run off main actor
+                    Task.detached(priority: .userInitiated) { [node, map] in
+                        let summaries = Self.buildExtensionSummaries(root: node, map: map)
+                        await MainActor.run { self.extensionSummaries = summaries }
+                    }
+                    // Duplicate detection: lower priority, also off main actor
                     Task.detached(priority: .utility) { [node] in
                         let detector = DuplicateDetector()
                         await detector.detect(in: node)
@@ -171,17 +177,24 @@ public final class ScanViewModel: ObservableObject {
     }
 
     private nonisolated static func collectAll(node: FSNode, into list: inout [FSNode]) {
-        list.append(node)
-        for child in node.children { collectAll(node: child, into: &list) }
+        var stack = [node]
+        while !stack.isEmpty {
+            let n = stack.removeLast()
+            list.append(n)
+            stack.append(contentsOf: n.children)
+        }
     }
 
     private nonisolated static func collectExtensions(node: FSNode, into groups: inout [String: (count: Int, size: Int64)]) {
-        if !node.isDirectory {
-            let key = node.fileExtension
-            groups[key, default: (0, 0)].count += 1
-            groups[key, default: (0, 0)].size += node.size
+        var stack = [node]
+        while !stack.isEmpty {
+            let n = stack.removeLast()
+            if !n.isDirectory {
+                groups[n.fileExtension, default: (0, 0)].count += 1
+                groups[n.fileExtension, default: (0, 0)].size  += n.size
+            }
+            stack.append(contentsOf: n.children)
         }
-        for child in node.children { collectExtensions(node: child, into: &groups) }
     }
 
     public func exportCSV() {

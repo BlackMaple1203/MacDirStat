@@ -102,8 +102,13 @@ private func _buildTree(
             try await withThrowingTaskGroup(of: FSNode?.self) { group in
                 for (subPath, subURL) in listing.subdirPaths {
                     group.addTask {
+                        // Propagate cancellation; silently skip symlinks / unreadable entries.
                         try Task.checkCancellation()
-                        return try await _buildTree(path: subPath, url: subURL, parent: node, rootDev: rootDev, counter: counter)
+                        do {
+                            return try await _buildTree(path: subPath, url: subURL, parent: node, rootDev: rootDev, counter: counter)
+                        } catch is SkipError {
+                            return nil
+                        }
                     }
                 }
                 for try await child in group {
