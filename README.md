@@ -16,7 +16,7 @@ A fast, beautiful macOS disk usage visualizer — built entirely in Swift.</p>
 
 ---
 
-![MacDirStat screenshot](Screenshots/Screenshot%202026-05-03%20at%2012.01.37%E2%80%AFPM.png)
+![MacDirStat demo](demo.gif)
 
 ---
 
