@@ -38,12 +38,6 @@ MacDirStat scans any folder and turns your filesystem into an interactive sunbur
 - **CSV export** — dump the full scan as a spreadsheet
 - **Settings** — toggle haptic feedback on/off
 
-## Screenshots
-
-| Full view | File types | Expanded types |
-|---|---|---|
-| ![](Screenshots/Screenshot%202026-05-03%20at%2012.01.37%E2%80%AFPM.png) | ![](Screenshots/Screenshot%202026-05-03%20at%2012.02.00%E2%80%AFPM.png) | ![](Screenshots/Screenshot%202026-05-03%20at%2012.02.07%E2%80%AFPM.png) |
-
 ## Install
 
 **Mac App Store** *(coming soon)*
