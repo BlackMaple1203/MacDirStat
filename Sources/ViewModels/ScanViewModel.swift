@@ -26,8 +26,22 @@ public final class ScanViewModel: ObservableObject {
     private var layoutSize: CGSize = .zero
     private var layoutGeneration: Int = 0
     private var securityScopedURL: URL?
+    private var memoryPressureSource: DispatchSourceMemoryPressure?
 
-    public init() {}
+    public init() {
+        setupMemoryPressureHandler()
+    }
+
+    private func setupMemoryPressureHandler() {
+        let source = DispatchSource.makeMemoryPressureSource(eventMask: [.warning, .critical], queue: .main)
+        source.setEventHandler { [weak self] in
+            guard let self, self.isScanning else { return }
+            self.cancelScan()
+            self.errorMessage = "Scan cancelled: system memory is low."
+        }
+        source.resume()
+        memoryPressureSource = source
+    }
 
     public func scan(url: URL) {
         // Release any previous security scope before acquiring a new one
@@ -233,15 +247,18 @@ public final class ScanViewModel: ObservableObject {
     }
 
     private nonisolated static func appendCSV(node: FSNode, to lines: inout [String]) {
-        let type = node.isDirectory ? "directory" : node.fileExtension
-        let group = node.duplicateGroupID?.uuidString ?? ""
-        lines.append([
-            csvEscape(node.url.path),
-            "\(node.size)",
-            csvEscape(ByteFormatter.string(from: node.size)),
-            csvEscape(type),
-            csvEscape(group)
-        ].joined(separator: ","))
-        for child in node.children { appendCSV(node: child, to: &lines) }
+        var stack: [FSNode] = [node]
+        while let current = stack.popLast() {
+            let type = current.isDirectory ? "directory" : current.fileExtension
+            let group = current.duplicateGroupID?.uuidString ?? ""
+            lines.append([
+                csvEscape(current.url.path),
+                "\(current.size)",
+                csvEscape(ByteFormatter.string(from: current.size)),
+                csvEscape(type),
+                csvEscape(group)
+            ].joined(separator: ","))
+            stack.append(contentsOf: current.children)
+        }
     }
 }

@@ -34,10 +34,13 @@ public actor DuplicateDetector {
     }
 
     private func collect(node: FSNode, into list: inout [FSNode]) {
-        if !node.isDirectory && node.size >= minSize && node.size <= maxSize {
-            list.append(node)
+        var stack: [FSNode] = [node]
+        while let current = stack.popLast() {
+            if !current.isDirectory && current.size >= minSize && current.size <= maxSize {
+                list.append(current)
+            }
+            stack.append(contentsOf: current.children)
         }
-        for child in node.children { collect(node: child, into: &list) }
     }
 
     private func sha256(url: URL) -> String? {
