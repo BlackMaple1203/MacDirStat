@@ -23,6 +23,7 @@ struct ContentView: View {
             vm.scan(url: url)
             return true
         }
+        .navigationTitle("")
         .toolbar {
             ToolbarItemGroup(placement: .navigation) {
                 if activeTab == .treemap, vm.root != nil || vm.isScanning {
@@ -32,7 +33,7 @@ struct ContentView: View {
                     .disabled(vm.drillStack.isEmpty)
 
                     if let node = vm.treemapRoot {
-                        BreadcrumbView(url: node.url)
+                        FolderTitleView(url: node.url)
                     }
                 }
             }
@@ -94,57 +95,74 @@ struct ContentView: View {
 
     @ViewBuilder
     private var tabPicker: some View {
-        HStack(spacing: 0) {
-            tabButton(tab: .treemap, icon: "square.3.layers.3d", label: "Treemap")
-            tabButton(tab: .duplicates, icon: "doc.on.doc", label: duplicatesLabel, badge: duplicatesBadge)
+        // 2-pt inset padding so the active pill has breathing room from the outer rail
+        HStack(spacing: 2) {
+            tabButton(tab: .treemap,    icon: "square.3.layers.3d", label: "Treemap")
+            tabButton(tab: .duplicates, icon: "doc.on.doc",          label: "Duplicates",
+                      badge: duplicatesBadge, detecting: !vm.duplicatesReady && vm.root != nil)
         }
-        .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.primary.opacity(0.08)))
+        .padding(2)
+        .background(.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
+        .fixedSize()
     }
 
-    private var duplicatesLabel: String { "Duplicates" }
-
     private var duplicatesBadge: String? {
-        if vm.isScanning { return nil }
-        if !vm.duplicatesReady { return nil }
-        let count = vm.duplicateGroups.count
-        return count > 0 ? "\(count)" : nil
+        guard vm.duplicatesReady, !vm.isScanning else { return nil }
+        let n = vm.duplicateGroups.count
+        return n > 0 ? "\(n)" : nil
     }
 
     @ViewBuilder
-    private func tabButton(tab: DetailTab, icon: String, label: String, badge: String? = nil) -> some View {
+    private func tabButton(
+        tab: DetailTab,
+        icon: String,
+        label: String,
+        badge: String? = nil,
+        detecting: Bool = false
+    ) -> some View {
         let isActive = activeTab == tab
-        let isDetecting = tab == .duplicates && !vm.duplicatesReady && vm.root != nil
 
         Button {
-            withAnimation(.easeInOut(duration: 0.18)) { activeTab = tab }
+            withAnimation(.easeInOut(duration: 0.16)) { activeTab = tab }
         } label: {
             HStack(spacing: 5) {
-                if isDetecting {
-                    ProgressView().controlSize(.mini).frame(width: 13, height: 13)
-                } else {
-                    Image(systemName: icon)
-                        .font(.system(size: 11, weight: .medium))
+                // Fixed-size icon slot so width never jumps when spinner appears
+                ZStack {
+                    if detecting {
+                        ProgressView().controlSize(.mini).scaleEffect(0.8)
+                    } else {
+                        Image(systemName: icon)
+                            .font(.system(size: 11, weight: .medium))
+                    }
                 }
+                .frame(width: 14, height: 14)
+
                 Text(label)
-                    .font(.system(size: 12, weight: isActive ? .semibold : .regular))
+                    .font(.system(size: 12, weight: .medium))
+                    .fixedSize()
+
                 if let badge {
                     Text(badge)
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
-                        .padding(.horizontal, 5)
-                        .padding(.vertical, 1.5)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 1)
                         .background(.orange, in: Capsule())
+                        .fixedSize()
                 }
             }
             .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(isActive ? Color.primary.opacity(0.10) : Color.clear,
-                        in: RoundedRectangle(cornerRadius: 6))
+            .padding(.vertical, 4)
+            .background(
+                isActive
+                    ? AnyShapeStyle(.background.shadow(.drop(color: .black.opacity(0.12), radius: 1, y: 1)))
+                    : AnyShapeStyle(Color.clear),
+                in: RoundedRectangle(cornerRadius: 7)
+            )
             .foregroundStyle(isActive ? .primary : .secondary)
         }
         .buttonStyle(.plain)
-        .disabled(tab == .duplicates && vm.root == nil)
+        .disabled(tab == .duplicates && vm.root == nil && !detecting)
     }
 
     // MARK: - Detail content
@@ -233,31 +251,32 @@ private struct WelcomeView: View {
     }
 }
 
-// MARK: - Breadcrumb
+// MARK: - Folder title (compact — name + one parent level)
 
-private struct BreadcrumbView: View {
+private struct FolderTitleView: View {
     let url: URL
 
-    private var parts: [String] { url.pathComponents.filter { $0 != "/" } }
+    private var name: String { url.lastPathComponent }
+    private var parent: String? {
+        let p = url.deletingLastPathComponent().lastPathComponent
+        return (p.isEmpty || p == "/") ? nil : p
+    }
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 3) {
-                ForEach(Array(parts.enumerated()), id: \.offset) { i, part in
-                    if i > 0 {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 9, weight: .semibold))
-                            .foregroundStyle(.tertiary)
-                    }
-                    Text(part)
-                        .font(.system(.caption, design: .default))
-                        .foregroundStyle(i == parts.count - 1 ? .primary : .secondary)
-                        .fontWeight(i == parts.count - 1 ? .medium : .regular)
-                }
+        HStack(spacing: 4) {
+            if let parent {
+                Text(parent)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.tertiary)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.quaternary)
             }
-            .padding(.horizontal, 2)
+            Text(name)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.primary)
         }
-        .frame(maxWidth: 380)
+        .lineLimit(1)
     }
 }
 
