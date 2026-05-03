@@ -88,5 +88,5 @@ If you find it useful, the [App Store version](https://apps.apple.com) is the be
 ---
 
 <div align="center">
-Made with care on a Mac &nbsp;·&nbsp; <a href="https://github.com/Ti-03/MacDirStat/issues">Report a bug</a> &nbsp;·&nbsp; <a href="https://ti-03.github.io/MacDirStat">Website</a>
+Built with ❤️ by &nbsp;·&nbsp; <a href="https://ti0.me/">Ti</a> &nbsp;·&nbsp; 
 </div>
