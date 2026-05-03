@@ -1,10 +1,11 @@
 <div align="center">
-  <img src="logo.png" width="120" alt="MacDirStat icon" />
 
-# MacDirStat
+<img src="logo.png" width="120" alt="MacDirStat icon" />
 
-**See where your disk space went.**  
-A fast, beautiful macOS disk usage visualizer — built entirely in Swift.
+<h1>MacDirStat</h1>
+
+<p><strong>See where your disk space went.</strong><br/>
+A fast, beautiful macOS disk usage visualizer — built entirely in Swift.</p>
 
 [![macOS](https://img.shields.io/badge/macOS-14%2B-black?style=flat-square&logo=apple)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.10-F05138?style=flat-square&logo=swift)](https://swift.org)
