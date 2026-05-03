@@ -2,6 +2,8 @@ import SwiftUI
 
 struct DuplicatesView: View {
     @EnvironmentObject private var vm: ScanViewModel
+    // Expanded state lives here so LazyVStack rows don't need @State on init
+    @State private var expanded: Set<Int> = []
 
     var body: some View {
         let groups = vm.duplicateGroups
@@ -13,32 +15,48 @@ struct DuplicatesView: View {
             VStack(spacing: 0) {
                 summaryBar(groups: groups)
                 Divider()
-                List {
-                    ForEach(Array(groups.enumerated()), id: \.offset) { _, group in
-                        DuplicateGroupRow(group: group)
+                ScrollView {
+                    LazyVStack(spacing: 0, pinnedViews: []) {
+                        ForEach(Array(groups.enumerated()), id: \.offset) { index, group in
+                            GroupSection(
+                                index: index,
+                                group: group,
+                                isExpanded: expanded.contains(index),
+                                onToggle: {
+                                    withAnimation(.easeInOut(duration: 0.15)) {
+                                        if expanded.contains(index) { expanded.remove(index) }
+                                        else { expanded.insert(index) }
+                                    }
+                                },
+                                onDeleteGroup: { deleteGroup(group) },
+                                onDeleteNode: { deleteNode($0) }
+                            )
+                            Divider().padding(.leading, 12)
+                        }
                     }
+                    .padding(.vertical, 4)
                 }
-                .listStyle(.inset)
             }
         }
     }
 
+    // MARK: - Summary bar
+
     @ViewBuilder
     private func summaryBar(groups: [[FSNode]]) -> some View {
         let totalWasted = groups.reduce(Int64(0)) { $0 + $1[0].size * Int64($1.count - 1) }
-        let totalFiles = groups.reduce(0) { $0 + $1.count - 1 }
+        let totalFiles  = groups.reduce(0) { $0 + $1.count - 1 }
 
         HStack(spacing: 16) {
             Label("\(groups.count) groups", systemImage: "square.on.square")
                 .font(.caption).foregroundStyle(.secondary)
             Label("\(totalFiles) duplicate files", systemImage: "doc.on.doc")
                 .font(.caption).foregroundStyle(.secondary)
-            Label(ByteFormatter.string(from: totalWasted) + " wasted", systemImage: "externaldrive.badge.minus")
+            Label(ByteFormatter.string(from: totalWasted) + " wasted",
+                  systemImage: "externaldrive.badge.minus")
                 .font(.caption).foregroundStyle(.orange)
             Spacer()
-            Button(role: .destructive) {
-                deleteAll(groups: groups)
-            } label: {
+            Button(role: .destructive) { deleteAll(groups: groups) } label: {
                 Label("Delete All Duplicates", systemImage: "trash")
                     .font(.caption.weight(.medium))
             }
@@ -49,6 +67,8 @@ struct DuplicatesView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
     }
+
+    // MARK: - Delete helpers
 
     private func deleteAll(groups: [[FSNode]]) {
         guard let rootURL = vm.root?.url else { return }
@@ -62,63 +82,8 @@ struct DuplicatesView: View {
         }
         if deleted { vm.scan(url: rootURL) }
     }
-}
 
-// MARK: - Group Row
-
-private struct DuplicateGroupRow: View {
-    @EnvironmentObject private var vm: ScanViewModel
-    let group: [FSNode]
-    @State private var isExpanded = true
-
-    private var wasted: Int64 { group[0].size * Int64(group.count - 1) }
-
-    var body: some View {
-        Section(isExpanded: $isExpanded) {
-            ForEach(Array(group.enumerated()), id: \.element.id) { index, node in
-                FileRow(node: node, isKeep: index == 0, onDelete: {
-                    deleteNode(node)
-                })
-            }
-        } header: {
-            groupHeader
-        }
-    }
-
-    @ViewBuilder
-    private var groupHeader: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "square.on.square.dashed")
-                .font(.system(size: 11))
-                .foregroundStyle(.orange)
-
-            Text("\(group.count) identical copies")
-                .fontWeight(.semibold)
-                .font(.system(size: 12))
-
-            Text("·")
-                .foregroundStyle(.tertiary)
-
-            Text(ByteFormatter.string(from: wasted) + " wasted")
-                .font(.system(size: 12))
-                .foregroundStyle(.orange)
-
-            Spacer()
-
-            Button(role: .destructive) {
-                deleteGroup()
-            } label: {
-                Label("Keep 1, Delete \(group.count - 1)", systemImage: "trash")
-                    .font(.system(size: 11, weight: .medium))
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.mini)
-            .tint(.red)
-        }
-        .padding(.vertical, 2)
-    }
-
-    private func deleteGroup() {
+    private func deleteGroup(_ group: [FSNode]) {
         guard let rootURL = vm.root?.url else { return }
         var deleted = false
         for node in group.dropFirst() {
@@ -137,29 +102,110 @@ private struct DuplicateGroupRow: View {
     }
 }
 
-// MARK: - File Row
+// MARK: - Group section (value type — no @State, safe for LazyVStack)
+
+private struct GroupSection: View {
+    let index: Int
+    let group: [FSNode]
+    let isExpanded: Bool
+    let onToggle: () -> Void
+    let onDeleteGroup: () -> Void
+    let onDeleteNode: (FSNode) -> Void
+
+    private var wasted: Int64 { group[0].size * Int64(group.count - 1) }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header row — always visible
+            Button(action: onToggle) {
+                HStack(spacing: 8) {
+                    Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.tertiary)
+                        .frame(width: 12)
+
+                    Image(systemName: "square.on.square.dashed")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.orange)
+
+                    Text("\(group.count) identical copies")
+                        .font(.system(size: 12, weight: .semibold))
+
+                    Text("·")
+                        .foregroundStyle(.tertiary)
+
+                    Text(ByteFormatter.string(from: wasted) + " wasted")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.orange)
+
+                    Spacer()
+
+                    // Show one filename as a hint when collapsed
+                    if !isExpanded {
+                        Text(group[0].name)
+                            .font(.system(size: 11))
+                            .foregroundStyle(.tertiary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .frame(maxWidth: 180, alignment: .trailing)
+                    }
+
+                    Button(role: .destructive, action: onDeleteGroup) {
+                        Label("Keep 1, Delete \(group.count - 1)", systemImage: "trash")
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                    .tint(.red)
+                    // Don't let the delete button trigger the expand toggle
+                    .onTapGesture {}
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            // File rows — only rendered when expanded
+            if isExpanded {
+                VStack(spacing: 0) {
+                    ForEach(Array(group.enumerated()), id: \.element.id) { i, node in
+                        FileRow(node: node, isKeep: i == 0) { onDeleteNode(node) }
+                        if i < group.count - 1 {
+                            Divider().padding(.leading, 52)
+                        }
+                    }
+                }
+                .background(Color.primary.opacity(0.02))
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+    }
+}
+
+// MARK: - File row
 
 private struct FileRow: View {
-    @EnvironmentObject private var vm: ScanViewModel
     let node: FSNode
     let isKeep: Bool
     let onDelete: () -> Void
-
     @State private var isHovered = false
 
     var body: some View {
-        HStack(spacing: 8) {
-            // Keep / duplicate badge
-            if isKeep {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.green)
-                    .help("This copy will be kept")
-            } else {
-                Image(systemName: "doc.badge.plus")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
+        HStack(spacing: 10) {
+            // Keep / duplicate badge — fixed width so columns align
+            Group {
+                if isKeep {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                } else {
+                    Image(systemName: "doc.badge.plus")
+                        .foregroundStyle(.secondary)
+                }
             }
+            .font(.system(size: 13))
+            .frame(width: 16)
+            .padding(.leading, 28)
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(node.name)
@@ -177,8 +223,8 @@ private struct FileRow: View {
             Text(ByteFormatter.string(from: node.size))
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(.secondary)
+                .fixedSize()
 
-            // Trash button — always visible for duplicates, hidden for keep
             if isKeep {
                 Color.clear.frame(width: 24, height: 24)
             } else {
@@ -193,7 +239,8 @@ private struct FileRow: View {
                 .help("Move to Trash")
             }
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 5)
+        .padding(.trailing, 12)
         .contentShape(Rectangle())
         .contextMenu {
             Button("Reveal in Finder") {
