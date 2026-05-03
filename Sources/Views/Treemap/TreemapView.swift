@@ -6,6 +6,8 @@ struct TreemapView: View {
     @State private var cursorPos: CGPoint = .zero
     @State private var viewSize: CGSize = .zero
     @State private var drillGeneration: Int = 0   // increments on drill for transition
+    @State private var drillingIn: Bool = true
+    @State private var clickAnchor: UnitPoint = .center
 
     private var chartCenter: CGPoint {
         CGPoint(x: viewSize.width / 2, y: viewSize.height / 2)
@@ -48,7 +50,7 @@ struct TreemapView: View {
                 )
             }
             .id(drillGeneration)
-            .transition(.opacity.animation(.easeInOut(duration: 0.22)))
+            .transition(Self.drillTransition(drillingIn: drillingIn, anchor: clickAnchor))
             .onContinuousHover { phase in
                 switch phase {
                 case .active(let loc):
@@ -116,14 +118,20 @@ struct TreemapView: View {
         if TreemapRenderer.isInCenter(point: loc, center: c) {
             guard !vm.drillStack.isEmpty else { return }
             HapticEngine.shared.drillOut()
-            withAnimation(.easeInOut(duration: 0.22)) { drillGeneration += 1 }
+            drillingIn = false
+            clickAnchor = .center
+            withAnimation(.spring(response: 0.38, dampingFraction: 0.82)) { drillGeneration += 1 }
             vm.drillUp()
             return
         }
         guard let cell = TreemapRenderer.cell(at: loc, center: c, in: vm.cells) else { return }
         if cell.node.isDirectory {
             HapticEngine.shared.drillIn()
-            withAnimation(.easeInOut(duration: 0.22)) { drillGeneration += 1 }
+            drillingIn = true
+            let w = viewSize.width > 0 ? viewSize.width : 1
+            let h = viewSize.height > 0 ? viewSize.height : 1
+            clickAnchor = UnitPoint(x: loc.x / w, y: loc.y / h)
+            withAnimation(.spring(response: 0.38, dampingFraction: 0.82)) { drillGeneration += 1 }
             vm.drillDown(into: cell.node)
         } else {
             HapticEngine.shared.select()
@@ -171,7 +179,9 @@ struct TreemapView: View {
                 Divider()
                 Button {
                     HapticEngine.shared.drillIn()
-                    withAnimation(.easeInOut(duration: 0.22)) { drillGeneration += 1 }
+                    drillingIn = true
+                    clickAnchor = .center
+                    withAnimation(.spring(response: 0.38, dampingFraction: 0.82)) { drillGeneration += 1 }
                     vm.drillDown(into: node)
                 } label: {
                     Label("Open in Chart", systemImage: "arrow.down.right.circle")
@@ -219,6 +229,51 @@ struct TreemapView: View {
         .frame(width: TreemapLayout.centerRadius * 2 - 20)
         .contentTransition(.numericText())
         .animation(.easeInOut(duration: 0.3), value: root.id)
+    }
+
+    // MARK: - Drill transition
+
+    private struct DrillEffect: ViewModifier {
+        var scale: CGFloat
+        var rotation: Double
+        var opacity: Double
+        var blur: Double
+        var anchor: UnitPoint
+
+        func body(content: Content) -> some View {
+            content
+                .scaleEffect(scale, anchor: anchor)
+                .rotationEffect(.degrees(rotation), anchor: anchor)
+                .opacity(opacity)
+                .blur(radius: blur)
+        }
+    }
+
+    private static func drillTransition(drillingIn: Bool, anchor: UnitPoint) -> AnyTransition {
+        let a = anchor
+        if drillingIn {
+            return .asymmetric(
+                insertion: .modifier(
+                    active:   DrillEffect(scale: 0.82, rotation: -4, opacity: 0, blur: 5, anchor: a),
+                    identity: DrillEffect(scale: 1.00, rotation:  0, opacity: 1, blur: 0, anchor: a)
+                ),
+                removal: .modifier(
+                    active:   DrillEffect(scale: 1.18, rotation:  4, opacity: 0, blur: 5, anchor: a),
+                    identity: DrillEffect(scale: 1.00, rotation:  0, opacity: 1, blur: 0, anchor: a)
+                )
+            )
+        } else {
+            return .asymmetric(
+                insertion: .modifier(
+                    active:   DrillEffect(scale: 1.18, rotation:  4, opacity: 0, blur: 5, anchor: .center),
+                    identity: DrillEffect(scale: 1.00, rotation:  0, opacity: 1, blur: 0, anchor: .center)
+                ),
+                removal: .modifier(
+                    active:   DrillEffect(scale: 0.82, rotation: -4, opacity: 0, blur: 5, anchor: .center),
+                    identity: DrillEffect(scale: 1.00, rotation:  0, opacity: 1, blur: 0, anchor: .center)
+                )
+            )
+        }
     }
 
     // MARK: - Helpers
