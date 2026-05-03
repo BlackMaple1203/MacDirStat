@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MacDirStat — Visualize Your Disk Space</title>
+  <meta name="description" content="MacDirStat scans any folder and shows you exactly where your disk space is going — instantly. Beautiful treemap visualization with duplicate detection." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f12;
+      --surface: #161920;
+      --border: rgba(255,255,255,0.07);
+      --text: #f0f2f5;
+      --muted: #8b8fa8;
+      --accent: #4f8ef7;
+      --orange: #f5a623;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(13,15,18,0.85);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 17px;
+    }
+    .nav-brand img { width: 30px; height: 30px; border-radius: 7px; }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; color: #fff; }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 100px 24px 80px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .hero-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 22px;
+      margin-bottom: 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .hero h1 {
+      font-size: clamp(38px, 6vw, 56px);
+      font-weight: 700;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 18px;
+    }
+    .hero p {
+      font-size: 19px;
+      color: var(--muted);
+      max-width: 500px;
+      margin: 0 auto 36px;
+    }
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-large {
+      padding: 13px 28px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-large:hover { opacity: 0.85; }
+
+    /* BADGES */
+    .badges {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 28px;
+    }
+    .badge {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* SCREENSHOTS */
+    .screenshots {
+      padding: 20px 24px 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .screenshot-main {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+      margin-bottom: 16px;
+    }
+    .screenshot-main img { width: 100%; display: block; }
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .screenshot-grid .screenshot-main { margin-bottom: 0; }
+
+    /* FEATURES */
+    .features {
+      padding: 80px 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .section-label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .section-title {
+      text-align: center;
+      font-size: clamp(28px, 4vw, 38px);
+      font-weight: 700;
+      letter-spacing: -0.8px;
+      margin-bottom: 56px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+    }
+    .feature-icon {
+      font-size: 26px;
+      margin-bottom: 14px;
+    }
+    .feature-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* TECH */
+    .tech {
+      padding: 80px 24px;
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .tech table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 36px;
+      text-align: left;
+    }
+    .tech td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .tech td:first-child { color: var(--muted); width: 120px; }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 36px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    footer p { font-size: 13px; color: var(--muted); }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+    .footer-links { display: flex; gap: 24px; }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .hero { padding: 60px 20px 40px; }
+      .screenshot-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-brand" href="#">
+      <img src="logo.png" alt="MacDirStat icon" />
+      MacDirStat
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="https://github.com/Ti-03/MacDirStat">GitHub</a>
+      <a href="privacy.html">Privacy</a>
+      <a class="btn" href="https://apps.apple.com">App Store</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <img class="hero-logo" src="logo.png" alt="MacDirStat" />
+    <h1>See where your disk space went.</h1>
+    <p>MacDirStat scans any folder and turns your filesystem into a beautiful, interactive visualization. Find duplicates, delete what you don't need, reclaim your space.</p>
+    <div class="hero-actions">
+      <a class="btn-large btn-primary" href="https://apps.apple.com">Download on the Mac App Store</a>
+      <a class="btn-large btn-secondary" href="https://github.com/Ti-03/MacDirStat">View Source</a>
+    </div>
+    <div class="badges">
+      <span class="badge">macOS 14+</span>
+      <span class="badge">Native Swift</span>
+      <span class="badge">No subscription</span>
+      <span class="badge">Open Source</span>
+    </div>
+  </section>
+
+  <section class="screenshots">
+    <div class="screenshot-main">
+      <img src="screenshot1.png" alt="MacDirStat treemap view" />
+    </div>
+    <div class="screenshot-grid">
+      <div class="screenshot-main">
+        <img src="screenshot2.png" alt="File types breakdown" />
+      </div>
+      <div class="screenshot-main">
+        <img src="screenshot3.png" alt="All file types list" />
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <p class="section-label">Features</p>
+    <h2 class="section-title">Everything you need to reclaim your disk</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🗺️</div>
+        <h3>Sunburst Treemap</h3>
+        <p>Every file and folder visualized as an arc sized by disk usage. Depth rings show hierarchy at a glance.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>Duplicate Detection</h3>
+        <p>Finds identical files by content hash and shows exactly how much space they waste. Delete all copies in one click.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🗂️</div>
+        <h3>File Type Breakdown</h3>
+        <p>See which file types are eating your space — videos, code, archives, images — color-coded and searchable.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🖱️</div>
+        <h3>Drill Navigation</h3>
+        <p>Click any folder to zoom in. Click back to go up. Navigate your disk like a map.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🗑️</div>
+        <h3>Delete Right Here</h3>
+        <p>Right-click any file or arc to move it to Trash. The chart updates instantly — no need to open Finder.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⌨️</div>
+        <h3>Force Touch Haptics</h3>
+        <p>Feel the weight of files through your trackpad. Large files give stronger feedback. A detail that matters.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tech">
+    <p class="section-label">Built Different</p>
+    <h2 class="section-title">Pure Swift. No Electron. No web views.</h2>
+    <table>
+      <tr><td>Scanner</td><td>POSIX opendir/fstatat with async task groups — parallel, cancellable</td></tr>
+      <tr><td>Renderer</td><td>SwiftUI Canvas — draws 1,000+ arcs at 30 fps</td></tr>
+      <tr><td>Duplicates</td><td>SHA-256 content hashing on a background actor</td></tr>
+      <tr><td>Haptics</td><td>NSHapticFeedbackManager — intensity scales with file size</td></tr>
+      <tr><td>Privacy</td><td>100% on-device. Zero network access. Zero tracking.</td></tr>
+    </table>
+  </section>
+
+  <footer>
+    <p>© 2026 Ti-03 · MacDirStat · <a href="privacy.html">Privacy Policy</a></p>
+    <div class="footer-links">
+      <a href="https://github.com/Ti-03/MacDirStat">GitHub</a>
+      <a href="https://github.com/Ti-03/MacDirStat/issues">Report a Bug</a>
+      <a href="privacy.html">Privacy</a>
+    </div>
+  </footer>
+
+</body>
+</html>

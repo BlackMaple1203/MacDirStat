@@ -152,7 +152,7 @@ struct TreemapView: View {
             Button {
                 NSWorkspace.shared.activateFileViewerSelecting([node.url])
             } label: {
-                Label("Reveal in Finder", systemImage: "folder.badge.magnifyingglass")
+                Label("Reveal in Finder", systemImage: "folder.viewfinder")
             }
             Button {
                 NSPasteboard.general.clearContents()

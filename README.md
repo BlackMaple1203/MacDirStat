@@ -1,49 +1,53 @@
 <div align="center">
+  <img src="logo.png" width="120" alt="MacDirStat icon" />
 
 # MacDirStat
 
-**Understand your disk in seconds.**  
+**See where your disk space went.**  
 A fast, beautiful macOS disk usage visualizer — built entirely in Swift.
-
-<!-- Replace with a real screenshot -->
-![MacDirStat screenshot](./assets/screenshot.png)
 
 [![macOS](https://img.shields.io/badge/macOS-14%2B-black?style=flat-square&logo=apple)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.10-F05138?style=flat-square&logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](./LICENSE)
-[![App Store](https://img.shields.io/badge/App%20Store-Download-0D96F6?style=flat-square&logo=appstore)](https://apps.apple.com)
+[![App Store](https://img.shields.io/badge/App%20Store-$4.99-0D96F6?style=flat-square&logo=appstore)](https://apps.apple.com)
 
 </div>
 
 ---
 
+![MacDirStat screenshot](Screenshots/Screenshot%202026-05-03%20at%2012.01.37%E2%80%AFPM.png)
+
+---
+
 ## What it does
 
-MacDirStat scans any folder and turns your file system into an interactive sunburst chart — every ring is a depth level, every arc is a file or folder, sized by disk usage. Hover anything to see details. Click to drill in. Feel the weight of large files through your trackpad.
+MacDirStat scans any folder and turns your filesystem into an interactive sunburst chart — every ring is a depth level, every arc is a file or folder, sized by disk usage. Hover to inspect. Click to drill in. Right-click to delete.
 
 ## Features
 
 - **Sunburst visualization** — depth rings, color-coded by file type (video, code, images, archives…)
-- **Spotlight hover** — everything else fades out when you hover an arc; large files pulse
-- **Force Touch haptics** — soft tap for small files, double/triple thud for multi-GB ones
-- **Drill navigation** — click any folder to zoom in, click the center to go back
+- **Spotlight hover** — everything else fades when you hover; selected files pulse with a glow
+- **Force Touch haptics** — soft tap for small files, triple thud for multi-GB ones
+- **Drill navigation** — click any folder to zoom in, click back to go up
+- **Duplicate detection** — finds identical files by content hash, shows wasted space per group
+- **One-click cleanup** — keep one copy, trash the rest — or delete file by file
 - **File list panel** — sortable tree view beside the chart, toggle to give the chart full width
-- **Extension legend** — top-5 type pills with a searchable "show all" popover for 1000s of types
-- **Duplicate detection** — finds identical files by content hash, marks them on the chart
+- **File type breakdown** — top file types with a searchable list of all types
 - **Move to Trash** — right-click any arc or row to trash it, chart refreshes instantly
 - **CSV export** — dump the full scan as a spreadsheet
+- **Settings** — toggle haptic feedback on/off
 
 ## Screenshots
 
-| Sunburst chart | File list | Extension legend |
+| Full view | File types | Expanded types |
 |---|---|---|
-| ![chart](./assets/chart.png) | ![list](./assets/list.png) | ![legend](./assets/legend.png) |
+| ![](Screenshots/Screenshot%202026-05-03%20at%2012.01.37%E2%80%AFPM.png) | ![](Screenshots/Screenshot%202026-05-03%20at%2012.02.00%E2%80%AFPM.png) | ![](Screenshots/Screenshot%202026-05-03%20at%2012.02.07%E2%80%AFPM.png) |
 
 ## Install
 
-**Mac App Store** *(easiest — supports the project)*
+**Mac App Store** *(supports the project)*
 
-> Coming soon — [notify me](https://github.com/Ti-03/MacDirStat/issues/1)
+> [Download on the App Store](https://apps.apple.com) — $4.99
 
 **Build from source**
 
@@ -63,13 +67,17 @@ Pure Swift + SwiftUI — no Electron, no web views, no dependencies.
 |---|---|
 | Scanner | POSIX `opendir`/`fstatat` with async task groups — parallel, cancellable |
 | Layout | Custom sunburst partition algorithm (band-width from view size) |
-| Renderer | SwiftUI `Canvas` — draws 1 000+ arcs at 30 fps |
+| Renderer | SwiftUI `Canvas` — draws 1,000+ arcs at 30 fps |
 | Haptics | `NSHapticFeedbackManager` — intensity scales with file size |
 | Duplicates | SHA-256 content hashing on a background actor |
 
+## Privacy
+
+MacDirStat collects zero data. No network access. No analytics. No tracking. Everything runs on your device. [Full privacy policy](https://ti-03.github.io/MacDirStat/privacy.html).
+
 ## Contributing
 
-PRs welcome. Open an issue first for anything beyond a bug fix so we can agree on direction.
+PRs welcome. Open an issue first for anything beyond a bug fix.
 
 ## License
 
@@ -79,5 +87,5 @@ If you find it useful, the [App Store version](https://apps.apple.com) is the be
 ---
 
 <div align="center">
-Made with care on a Mac &nbsp;·&nbsp; <a href="https://github.com/Ti-03/MacDirStat/issues">Report a bug</a>
+Made with care on a Mac &nbsp;·&nbsp; <a href="https://github.com/Ti-03/MacDirStat/issues">Report a bug</a> &nbsp;·&nbsp; <a href="https://ti-03.github.io/MacDirStat">Website</a>
 </div>

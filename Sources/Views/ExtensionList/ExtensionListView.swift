@@ -66,7 +66,7 @@ struct ExtensionListView: View {
                         NSPasteboard.general.clearContents()
                         NSPasteboard.general.setString(node.url.path, forType: .string)
                     }
-                    iconButton("folder.badge.magnifyingglass", help: "Reveal in Finder") {
+                    iconButton("folder.viewfinder", help: "Reveal in Finder") {
                         NSWorkspace.shared.activateFileViewerSelecting([node.url])
                     }
                     if node.isDirectory {
