@@ -13,7 +13,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 380)
+        .frame(minWidth: 360)
         .padding(.vertical, 8)
     }
 }

@@ -75,6 +75,8 @@ private struct ScanningPlaceholder: View {
                     .animation(.easeOut, value: items)
             }
         }
+        .padding(28)
+        .glassEffect(in: .rect(cornerRadius: 18))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
@@ -133,9 +135,9 @@ private struct NodeRow: View {
         }
         .padding(.vertical, 3)
         .padding(.horizontal, 4)
-        .background(
-            isSelected ? Color.accentColor.opacity(0.85) : Color.clear,
-            in: RoundedRectangle(cornerRadius: 5)
+        .glassEffect(
+            .regular.tint(isSelected ? Color.accentColor.opacity(0.5) : Color.clear).interactive(),
+            in: .rect(cornerRadius: 6)
         )
     }
 

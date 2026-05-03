@@ -67,6 +67,7 @@ struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
+        .scrollContentBackground(.hidden)
         .animation(.easeInOut(duration: 0.3), value: vm.duplicatesReady)
         .onAppear { volumes = mountedVolumes() }
         .onChange(of: vm.root?.url) { _, url in
@@ -128,18 +129,19 @@ private struct VolumeRow: View {
                 let usedFraction = min(1.0, Double(total - free) / Double(total))
                 GeometryReader { g in
                     ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(.quaternary)
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(capacityColor(fraction: usedFraction))
-                            .frame(width: max(0, g.size.width * usedFraction))
+                        Capsule().fill(.quaternary.opacity(0.5))
+                            .frame(height: 5)
+                        Capsule().fill(capacityColor(fraction: usedFraction))
+                            .frame(width: max(0, g.size.width * usedFraction), height: 5)
                     }
                 }
-                .frame(height: 4)
+                .frame(height: 5)
                 .padding(.leading, 30)
             }
         }
-        .padding(.vertical, 3)
+        .padding(.vertical, 6)
+        .padding(.horizontal, 4)
+        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
     }
 
     private func capacityColor(fraction: Double) -> Color {

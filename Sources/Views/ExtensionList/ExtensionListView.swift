@@ -16,7 +16,7 @@ struct ExtensionListView: View {
             Divider()
             legendBar
         }
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(.ultraThinMaterial)
     }
 
     // MARK: - Path bar
@@ -109,12 +109,9 @@ struct ExtensionListView: View {
                             Text("\(vm.extensionSummaries.count - topN) more")
                                 .font(.system(size: 11, weight: .medium))
                         }
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(.quaternary, in: Capsule())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.glass)
+                    .controlSize(.small)
                     .popover(isPresented: $showAllPopover, arrowEdge: .bottom) {
                         allExtensionsPopover
                             .onDisappear { searchText = "" }
@@ -230,12 +227,10 @@ struct ExtensionListView: View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.system(size: 13))
-                .foregroundStyle(.secondary)
                 .frame(width: 28, height: 28)
-                .background(.quaternary.opacity(0), in: RoundedRectangle(cornerRadius: 6))
-                .contentShape(RoundedRectangle(cornerRadius: 6))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.glass)
+        .controlSize(.small)
         .help(help)
     }
 }
@@ -273,14 +268,9 @@ private struct ExtLegendPill: View {
         }
         .padding(.horizontal, 9)
         .padding(.vertical, 5)
-        .background(
-            isActive ? item.color.opacity(0.16) : Color.primary.opacity(0.055),
-            in: Capsule()
-        )
-        .overlay(
-            Capsule()
-                .strokeBorder(isActive ? item.color.opacity(0.6) : Color.clear,
-                              lineWidth: 1)
+        .glassEffect(
+            .regular.tint(isActive ? item.color.opacity(0.4) : Color.clear).interactive(),
+            in: .capsule
         )
         .animation(.easeInOut(duration: 0.15), value: isActive)
     }

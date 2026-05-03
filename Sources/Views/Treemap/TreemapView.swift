@@ -84,7 +84,8 @@ struct TreemapView: View {
                     Text(vm.isScanning ? "Scanning…" : "Building…")
                         .font(.caption).foregroundStyle(.secondary)
                 }
-                .frame(width: TreemapLayout.centerRadius * 2 - 16)
+                .padding(20)
+                .glassEffect(in: .rect(cornerRadius: 16))
                 .allowsHitTesting(false)
             } else if let root = vm.treemapRoot, !vm.cells.isEmpty {
                 centerLabel(for: root)
@@ -226,7 +227,9 @@ struct TreemapView: View {
                 .font(.system(size: 9.5, design: .monospaced))
                 .foregroundStyle(.secondary)
         }
-        .frame(width: TreemapLayout.centerRadius * 2 - 20)
+        .frame(width: TreemapLayout.centerRadius * 2 - 8,
+               height: TreemapLayout.centerRadius * 2 - 8)
+        .glassEffect(.regular, in: .circle)
         .contentTransition(.numericText())
         .animation(.easeInOut(duration: 0.3), value: root.id)
     }
@@ -327,7 +330,9 @@ private struct HoverTooltip: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
         .frame(maxWidth: 380)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
-        .shadow(color: .black.opacity(0.28), radius: 14, x: 0, y: 5)
+        .glassEffect(
+            .regular.tint(node.isDirectory ? Color.clear : FileTypeIcon.color(for: node).opacity(0.25)),
+            in: .rect(cornerRadius: 14)
+        )
     }
 }

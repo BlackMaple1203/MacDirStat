@@ -60,12 +60,13 @@ struct DuplicatesView: View {
                 Label("Delete All Duplicates", systemImage: "trash")
                     .font(.caption.weight(.medium))
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.red.opacity(0.85))
+            .buttonStyle(.glass)
+            .tint(.red)
             .controlSize(.small)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
+        .background(.ultraThinMaterial)
     }
 
     // MARK: - Delete helpers
@@ -154,9 +155,9 @@ private struct GroupSection: View {
                         Label("Keep 1, Delete \(group.count - 1)", systemImage: "trash")
                             .font(.system(size: 11, weight: .medium))
                     }
-                    .buttonStyle(.bordered)
-                    .controlSize(.mini)
+                    .buttonStyle(.glass)
                     .tint(.red)
+                    .controlSize(.mini)
                     // Don't let the delete button trigger the expand toggle
                     .onTapGesture {}
                 }
