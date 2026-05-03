@@ -1,12 +1,13 @@
 import SwiftUI
 
+enum DetailTab { case treemap, duplicates }
+
 struct ContentView: View {
     @EnvironmentObject private var vm: ScanViewModel
     @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
-    /// Persisted user preference — survives relaunches and drill actions.
     @AppStorage("showFileTree") private var userWantsTree = true
-    /// True only while an initial scan is running (temporary, never persisted).
     @State private var scanHidesTree = false
+    @State private var activeTab: DetailTab = .treemap
 
     private var showTree: Bool { userWantsTree && !scanHidesTree }
 
@@ -24,7 +25,7 @@ struct ContentView: View {
         }
         .toolbar {
             ToolbarItemGroup(placement: .navigation) {
-                if vm.root != nil || vm.isScanning {
+                if activeTab == .treemap, vm.root != nil || vm.isScanning {
                     Button { vm.drillUp() } label: {
                         Image(systemName: "chevron.left")
                     }
@@ -36,16 +37,24 @@ struct ContentView: View {
                 }
             }
 
+            // Tab switcher — center of toolbar
+            ToolbarItem(placement: .principal) {
+                if vm.root != nil || vm.isScanning || vm.isComputingLayout {
+                    tabPicker
+                }
+            }
+
             ToolbarItemGroup(placement: .primaryAction) {
-                // Tree panel toggle — only show when there's something to display
-                if vm.root != nil {
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) { userWantsTree.toggle() }
-                    } label: {
-                        Image(systemName: "sidebar.left")
-                            .symbolVariant(showTree ? .none : .slash)
+                if activeTab == .treemap {
+                    if vm.root != nil {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) { userWantsTree.toggle() }
+                        } label: {
+                            Image(systemName: "sidebar.left")
+                                .symbolVariant(showTree ? .none : .slash)
+                        }
+                        .help(showTree ? "Hide file list" : "Show file list")
                     }
-                    .help(showTree ? "Hide file list" : "Show file list")
                 }
 
                 if vm.isScanning || vm.isComputingLayout {
@@ -70,10 +79,10 @@ struct ContentView: View {
                 }
             }
         }
-        // Temporarily hide tree while scanning; restore to user preference when done.
-        // Does NOT touch the scan when drilling — layout recomputes don't reset the panel.
         .onChange(of: vm.isScanning) { _, scanning in
             withAnimation(.easeInOut(duration: 0.2)) { scanHidesTree = scanning }
+            // Return to treemap tab when a new scan starts
+            if scanning { withAnimation { activeTab = .treemap } }
         }
         .animation(.easeInOut(duration: 0.2), value: vm.isScanning || vm.isComputingLayout)
         .onReceive(NotificationCenter.default.publisher(for: .exportCSV)) { _ in
@@ -81,27 +90,112 @@ struct ContentView: View {
         }
     }
 
+    // MARK: - Tab picker
+
+    @ViewBuilder
+    private var tabPicker: some View {
+        HStack(spacing: 0) {
+            tabButton(tab: .treemap, icon: "square.3.layers.3d", label: "Treemap")
+            tabButton(tab: .duplicates, icon: "doc.on.doc", label: duplicatesLabel, badge: duplicatesBadge)
+        }
+        .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.primary.opacity(0.08)))
+    }
+
+    private var duplicatesLabel: String { "Duplicates" }
+
+    private var duplicatesBadge: String? {
+        if vm.isScanning { return nil }
+        if !vm.duplicatesReady { return nil }
+        let count = vm.duplicateGroups.count
+        return count > 0 ? "\(count)" : nil
+    }
+
+    @ViewBuilder
+    private func tabButton(tab: DetailTab, icon: String, label: String, badge: String? = nil) -> some View {
+        let isActive = activeTab == tab
+        let isDetecting = tab == .duplicates && !vm.duplicatesReady && vm.root != nil
+
+        Button {
+            withAnimation(.easeInOut(duration: 0.18)) { activeTab = tab }
+        } label: {
+            HStack(spacing: 5) {
+                if isDetecting {
+                    ProgressView().controlSize(.mini).frame(width: 13, height: 13)
+                } else {
+                    Image(systemName: icon)
+                        .font(.system(size: 11, weight: .medium))
+                }
+                Text(label)
+                    .font(.system(size: 12, weight: isActive ? .semibold : .regular))
+                if let badge {
+                    Text(badge)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1.5)
+                        .background(.orange, in: Capsule())
+                }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(isActive ? Color.primary.opacity(0.10) : Color.clear,
+                        in: RoundedRectangle(cornerRadius: 6))
+            .foregroundStyle(isActive ? .primary : .secondary)
+        }
+        .buttonStyle(.plain)
+        .disabled(tab == .duplicates && vm.root == nil)
+    }
+
+    // MARK: - Detail content
+
     @ViewBuilder
     private var detailContent: some View {
         if vm.root == nil && !vm.isScanning && !vm.isComputingLayout {
             WelcomeView()
+        } else if activeTab == .duplicates {
+            duplicatesContent
         } else {
-            VStack(spacing: 0) {
-                if showTree {
-                    HSplitView {
-                        DirectoryTreeView()
-                            .frame(minWidth: 220, idealWidth: 300)
-                        TreemapView()
-                            .frame(minWidth: 300)
-                    }
-                } else {
-                    TreemapView()
-                }
+            treemapContent
+        }
+    }
 
-                Divider()
-                ExtensionListView()
-                    .frame(height: 84)
+    @ViewBuilder
+    private var treemapContent: some View {
+        VStack(spacing: 0) {
+            if showTree {
+                HSplitView {
+                    DirectoryTreeView()
+                        .frame(minWidth: 220, idealWidth: 300)
+                    TreemapView()
+                        .frame(minWidth: 300)
+                }
+            } else {
+                TreemapView()
             }
+            Divider()
+            ExtensionListView()
+                .frame(height: 84)
+        }
+    }
+
+    @ViewBuilder
+    private var duplicatesContent: some View {
+        if vm.root != nil && !vm.duplicatesReady {
+            VStack(spacing: 16) {
+                ProgressView()
+                Text("Scanning for duplicates…")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                Text("This runs in the background — it may take a moment for large folders.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 300)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            DuplicatesView()
         }
     }
 }

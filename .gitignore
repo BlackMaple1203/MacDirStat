@@ -1,7 +1,26 @@
+# Xcode user data (machine-specific, never commit)
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Build output
 .build/
+build/
+DerivedData/
+
+# Swift Package Manager cache
 .swiftpm/
+
+# macOS noise
+.DS_Store
+**/.DS_Store
+
+# Compiled object files
 *.o
 *.d
-xcuserdata/
-*.xcworkspace
-DerivedData/
+
+# Archives
+*.xcarchive
+
+# Test results
+*.xcresult

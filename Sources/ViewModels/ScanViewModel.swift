@@ -25,10 +25,20 @@ public final class ScanViewModel: ObservableObject {
     private var scanTask: Task<Void, Never>?
     private var layoutSize: CGSize = .zero
     private var layoutGeneration: Int = 0
+    private var securityScopedURL: URL?
 
     public init() {}
 
     public func scan(url: URL) {
+        // Release any previous security scope before acquiring a new one
+        securityScopedURL?.stopAccessingSecurityScopedResource()
+        securityScopedURL = nil
+
+        // App Sandbox: request access to the user-picked directory
+        if url.startAccessingSecurityScopedResource() {
+            securityScopedURL = url
+        }
+
         scanTask?.cancel()
         layoutGeneration += 1       // invalidate any in-progress layout
         scanURL = url
@@ -93,6 +103,8 @@ public final class ScanViewModel: ObservableObject {
         isScanning = false
         isComputingLayout = false
         scanURL = nil
+        securityScopedURL?.stopAccessingSecurityScopedResource()
+        securityScopedURL = nil
     }
 
     public func updateLayoutSize(_ size: CGSize) {
