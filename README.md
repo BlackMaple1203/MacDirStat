@@ -10,7 +10,7 @@ A fast, beautiful macOS disk usage visualizer — built entirely in Swift.</p>
 [![macOS](https://img.shields.io/badge/macOS-14%2B-black?style=flat-square&logo=apple)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.10-F05138?style=flat-square&logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](./LICENSE)
-[![App Store](https://img.shields.io/badge/App%20Store-$4.99-0D96F6?style=flat-square&logo=appstore)](https://apps.apple.com)
+![App Store](https://img.shields.io/badge/App%20Store-Coming%20Soon-999999?style=flat-square&logo=appstore)
 
 </div>
 
@@ -46,9 +46,9 @@ MacDirStat scans any folder and turns your filesystem into an interactive sunbur
 
 ## Install
 
-**Mac App Store** *(supports the project)*
+**Mac App Store** *(coming soon)*
 
-> [Download on the App Store](https://apps.apple.com) — $4.99
+> Coming soon
 
 **Build from source**
 
@@ -83,7 +83,7 @@ PRs welcome. Open an issue first for anything beyond a bug fix.
 ## License
 
 MIT — free to use, modify, and distribute.  
-If you find it useful, the [App Store version](https://apps.apple.com) is the best way to say thanks.
+If you find it useful, the App Store version *(coming soon)* will be the best way to say thanks.
 
 ---
 
