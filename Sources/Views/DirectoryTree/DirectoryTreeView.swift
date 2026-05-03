@@ -52,6 +52,8 @@ struct DirectoryTreeView: View {
                         }
                 }
                 .listStyle(.inset)
+                .scrollContentBackground(.hidden)
+                .background(.ultraThinMaterial)
             } else {
                 ScanningPlaceholder(items: vm.itemsScanned, bytes: vm.bytesFound)
             }

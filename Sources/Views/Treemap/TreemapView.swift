@@ -33,8 +33,6 @@ struct TreemapView: View {
     @ViewBuilder
     private func mainContent(pulse: Double) -> some View {
         ZStack {
-            Color(nsColor: .windowBackgroundColor)
-
             // Canvas tagged with drillGeneration so SwiftUI replaces it (with
             // a cross-fade transition) each time the user drills in or out.
             Canvas { ctx, size in

@@ -16,7 +16,7 @@ struct ExtensionListView: View {
             Divider()
             legendBar
         }
-        .background(.ultraThinMaterial)
+        .background(.thinMaterial)
     }
 
     // MARK: - Path bar

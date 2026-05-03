@@ -13,6 +13,7 @@
 		20E67F1EEADF74D28CDF6191 /* TreemapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40A6B24C517964825BA4B85 /* TreemapView.swift */; };
 		287777DD85DBCE044C004846 /* MacDirStatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B91AB72C561811A78E4DB8C /* MacDirStatApp.swift */; };
 		3864E5104A08A42FF56D7880 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8FDBB44CE9624311841E36 /* ContentView.swift */; };
+		3B190FDF9A024126B4ED2872 /* GlassWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08B5316639CA4AC8990FBDD4 /* GlassWindow.swift */; };
 		3881FC74433C93187BF941AF /* FSNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F5AEBBF9DECB5CB793339A /* FSNode.swift */; };
 		3F67AACE53A6C32467A5191C /* TreemapRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670402F6A7AEB43C1D764E04 /* TreemapRenderer.swift */; };
 		7AE6B3CB6CDE22EAA3AA46B3 /* DuplicateDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42B58422D704C6E5265DA664 /* DuplicateDetector.swift */; };
@@ -43,6 +44,7 @@
 		6E31AF29C163C3A431DA357F /* HapticEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticEngine.swift; sourceTree = "<group>"; };
 		783902530DE4EA8040806BC9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		7F8FDBB44CE9624311841E36 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		08B5316639CA4AC8990FBDD4 /* GlassWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassWindow.swift; sourceTree = "<group>"; };
 		87CAB05044416C1233CD89F1 /* MacDirStat.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacDirStat.entitlements; sourceTree = "<group>"; };
 		8911D9B9B974332D6C8A0DC6 /* ScanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanViewModel.swift; sourceTree = "<group>"; };
 		967A6155625E5F7CD9A4CC95 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -156,6 +158,7 @@
 			children = (
 				5B91AB72C561811A78E4DB8C /* MacDirStatApp.swift */,
 				7F8FDBB44CE9624311841E36 /* ContentView.swift */,
+				08B5316639CA4AC8990FBDD4 /* GlassWindow.swift */,
 				783902530DE4EA8040806BC9 /* SettingsView.swift */,
 			);
 			path = App;
@@ -278,6 +281,7 @@
 			files = (
 				287777DD85DBCE044C004846 /* MacDirStatApp.swift in Sources */,
 				3864E5104A08A42FF56D7880 /* ContentView.swift in Sources */,
+				3B190FDF9A024126B4ED2872 /* GlassWindow.swift in Sources */,
 				E5BB63BED418F08CF4727F72 /* SettingsView.swift in Sources */,
 				7AE6B3CB6CDE22EAA3AA46B3 /* DuplicateDetector.swift in Sources */,
 				C001072776950E6399A45B18 /* ExtensionColorMap.swift in Sources */,

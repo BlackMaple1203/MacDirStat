@@ -19,6 +19,7 @@ struct ContentView: View {
         } detail: {
             detailContent
         }
+        .glassWindow()
         .dropDestination(for: URL.self) { urls, _ in
             guard let url = urls.first, url.hasDirectoryPath else { return false }
             vm.scan(url: url)
