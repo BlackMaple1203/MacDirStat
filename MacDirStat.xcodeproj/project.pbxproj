@@ -13,29 +13,30 @@
 		20E67F1EEADF74D28CDF6191 /* TreemapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40A6B24C517964825BA4B85 /* TreemapView.swift */; };
 		287777DD85DBCE044C004846 /* MacDirStatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B91AB72C561811A78E4DB8C /* MacDirStatApp.swift */; };
 		3864E5104A08A42FF56D7880 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8FDBB44CE9624311841E36 /* ContentView.swift */; };
-		3B190FDF9A024126B4ED2872 /* GlassWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08B5316639CA4AC8990FBDD4 /* GlassWindow.swift */; };
 		3881FC74433C93187BF941AF /* FSNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35F5AEBBF9DECB5CB793339A /* FSNode.swift */; };
+		3B190FDF9A024126B4ED2872 /* GlassWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08B5316639CA4AC8990FBDD4 /* GlassWindow.swift */; };
 		3F67AACE53A6C32467A5191C /* TreemapRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 670402F6A7AEB43C1D764E04 /* TreemapRenderer.swift */; };
 		7AE6B3CB6CDE22EAA3AA46B3 /* DuplicateDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42B58422D704C6E5265DA664 /* DuplicateDetector.swift */; };
 		86B25923164A00AB10D72C9B /* ScanProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBCAD22DB54E68077B842421 /* ScanProgress.swift */; };
 		8D4491F1E310D7522AC953CF /* ByteFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63B9141E78488371B27E584 /* ByteFormatter.swift */; };
 		99810209AD4FE3320BC122AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 58F02208A1E6A99468703A4E /* Assets.xcassets */; };
 		A0ACA58C598D03980CE0E1A8 /* DirectoryTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51083B9602AF3966A2918311 /* DirectoryTreeView.swift */; };
+		AA0000000000000000000001 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000004 /* Sparkle */; };
+		AA11223344556677889900AA /* SafetyAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11223344556677889900BB /* SafetyAnalyzer.swift */; };
 		AEE6BD1042811A9E652EFFD1 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CAC3593B7A665AD55414A36 /* SidebarView.swift */; };
 		C001072776950E6399A45B18 /* ExtensionColorMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 074CBBA0222600D63C734574 /* ExtensionColorMap.swift */; };
 		C6DF8F53ABC9BAC0D4112104 /* TreemapCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A57889EBA74C350CC3B289A7 /* TreemapCell.swift */; };
 		C7CA42F3711C0D9BA152E308 /* FileTypeIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CCF3DBFA96ECFE224E1D228 /* FileTypeIcon.swift */; };
+		DD11223344556677889900DD /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11223344556677889900EE /* FileWatcher.swift */; };
 		E5BB63BED418F08CF4727F72 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 783902530DE4EA8040806BC9 /* SettingsView.swift */; };
 		F81DF36922942E2F442814A3 /* TreemapLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB4247FB8E3E3FB5AF053F9 /* TreemapLayout.swift */; };
-		AA11223344556677889900AA /* SafetyAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11223344556677889900BB /* SafetyAnalyzer.swift */; };
-		DD11223344556677889900DD /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE11223344556677889900EE /* FileWatcher.swift */; };
 		FB3E660E0C4E74F2A9EFBEF0 /* FileScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD56FD4714436315629F989 /* FileScanner.swift */; };
 		FD11F6ED4164F05503706848 /* ExtensionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987EDA67820F162556A7CA53 /* ExtensionListView.swift */; };
-		AA0000000000000000000001 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000004 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		074CBBA0222600D63C734574 /* ExtensionColorMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionColorMap.swift; sourceTree = "<group>"; };
+		08B5316639CA4AC8990FBDD4 /* GlassWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassWindow.swift; sourceTree = "<group>"; };
 		2767B8AD8F6829C36A3576E6 /* DuplicatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicatesView.swift; sourceTree = "<group>"; };
 		35F5AEBBF9DECB5CB793339A /* FSNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FSNode.swift; sourceTree = "<group>"; };
 		42B58422D704C6E5265DA664 /* DuplicateDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateDetector.swift; sourceTree = "<group>"; };
@@ -47,7 +48,6 @@
 		6E31AF29C163C3A431DA357F /* HapticEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticEngine.swift; sourceTree = "<group>"; };
 		783902530DE4EA8040806BC9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		7F8FDBB44CE9624311841E36 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		08B5316639CA4AC8990FBDD4 /* GlassWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassWindow.swift; sourceTree = "<group>"; };
 		87CAB05044416C1233CD89F1 /* MacDirStat.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacDirStat.entitlements; sourceTree = "<group>"; };
 		8911D9B9B974332D6C8A0DC6 /* ScanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanViewModel.swift; sourceTree = "<group>"; };
 		967A6155625E5F7CD9A4CC95 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -56,11 +56,11 @@
 		A57889EBA74C350CC3B289A7 /* TreemapCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapCell.swift; sourceTree = "<group>"; };
 		B63B9141E78488371B27E584 /* ByteFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ByteFormatter.swift; sourceTree = "<group>"; };
 		BAB4247FB8E3E3FB5AF053F9 /* TreemapLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapLayout.swift; sourceTree = "<group>"; };
+		BB11223344556677889900BB /* SafetyAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafetyAnalyzer.swift; sourceTree = "<group>"; };
 		C40A6B24C517964825BA4B85 /* TreemapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapView.swift; sourceTree = "<group>"; };
 		DBCAD22DB54E68077B842421 /* ScanProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanProgress.swift; sourceTree = "<group>"; };
-		BB11223344556677889900BB /* SafetyAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafetyAnalyzer.swift; sourceTree = "<group>"; };
-		EE11223344556677889900EE /* FileWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcher.swift; sourceTree = "<group>"; };
 		DDD56FD4714436315629F989 /* FileScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileScanner.swift; sourceTree = "<group>"; };
+		EE11223344556677889900EE /* FileWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcher.swift; sourceTree = "<group>"; };
 		F6ADF08FD012926F8704A51C /* MacDirStat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacDirStat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -197,6 +197,14 @@
 			path = ExtensionList;
 			sourceTree = "<group>";
 		};
+		CC11223344556677889900CC /* Safety */ = {
+			isa = PBXGroup;
+			children = (
+				BB11223344556677889900BB /* SafetyAnalyzer.swift */,
+			);
+			path = Safety;
+			sourceTree = "<group>";
+		};
 		D6C0DA3A2FC09B3404E91BF6 /* Layout */ = {
 			isa = PBXGroup;
 			children = (
@@ -213,14 +221,6 @@
 				8911D9B9B974332D6C8A0DC6 /* ScanViewModel.swift */,
 			);
 			path = ViewModels;
-			sourceTree = "<group>";
-		};
-		CC11223344556677889900CC /* Safety */ = {
-			isa = PBXGroup;
-			children = (
-				BB11223344556677889900BB /* SafetyAnalyzer.swift */,
-			);
-			path = Safety;
 			sourceTree = "<group>";
 		};
 		F0F0A7219106DE3B74E7B928 /* Sources */ = {
@@ -284,12 +284,12 @@
 				Base,
 			);
 			mainGroup = 71D2E56247FE75C3DCE9B609;
+			packageReferences = (
+				12489CF12FA94C3C00A48787 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			productRefGroup = 30772F61AC9BDC8631745269 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			packages = (
-				AA0000000000000000000003 /* XCRemoteSwiftPackageReference "Sparkle" */,
-			);
 			targets = (
 				33486FFC65E188DEB8FA1E16 /* MacDirStat */,
 			);
@@ -355,6 +355,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MacDirStat/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -382,6 +383,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MacDirStat/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -537,6 +539,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		12489CF12FA94C3C00A48787 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.9.1;
+			};
+		};
 		AA0000000000000000000003 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
