@@ -159,7 +159,7 @@ struct ContentView: View {
             .background {
                 if isActive {
                     RoundedRectangle(cornerRadius: 7)
-                        .fill(Color.white.opacity(0.2))
+                        .fill(.primary.opacity(0.12))
                         .matchedGeometryEffect(id: "tabHighlight", in: tabNamespace)
                 }
             }
@@ -233,7 +233,35 @@ struct ContentView: View {
 
 private struct WelcomeView: View {
     @EnvironmentObject private var vm: ScanViewModel
+    @Environment(\.colorScheme) private var colorScheme
     @State private var animate = false
+
+    private var isDark: Bool { colorScheme == .dark }
+
+    // Dark mode: deep indigo/violet. Light mode: soft lavender/periwinkle pastels.
+    private var gradientColors: [Color] {
+        isDark ? [
+            Color(hue: 0.67, saturation: 0.65, brightness: 0.28),
+            Color(hue: 0.72, saturation: 0.75, brightness: 0.22),
+            Color(hue: 0.62, saturation: 0.55, brightness: 0.32),
+            Color(hue: 0.70, saturation: 0.70, brightness: 0.26),
+            Color(hue: 0.65, saturation: 0.60, brightness: 0.38),
+            Color(hue: 0.75, saturation: 0.65, brightness: 0.28),
+            Color(hue: 0.62, saturation: 0.50, brightness: 0.24),
+            Color(hue: 0.68, saturation: 0.75, brightness: 0.28),
+            Color(hue: 0.72, saturation: 0.65, brightness: 0.26)
+        ] : [
+            Color(hue: 0.67, saturation: 0.28, brightness: 0.97),
+            Color(hue: 0.72, saturation: 0.22, brightness: 0.99),
+            Color(hue: 0.60, saturation: 0.20, brightness: 0.98),
+            Color(hue: 0.70, saturation: 0.25, brightness: 0.96),
+            Color(hue: 0.65, saturation: 0.18, brightness: 1.00),
+            Color(hue: 0.75, saturation: 0.22, brightness: 0.97),
+            Color(hue: 0.62, saturation: 0.20, brightness: 0.98),
+            Color(hue: 0.68, saturation: 0.28, brightness: 0.95),
+            Color(hue: 0.72, saturation: 0.22, brightness: 0.97)
+        ]
+    }
 
     var body: some View {
         ZStack {
@@ -244,17 +272,7 @@ private struct WelcomeView: View {
                     .init(0, 0.5), animate ? .init(0.55, 0.42) : .init(0.45, 0.58), .init(1, 0.5),
                     .init(0, 1), .init(0.5, 1), .init(1, 1)
                 ],
-                colors: [
-                    Color(hue: 0.67, saturation: 0.65, brightness: 0.28),
-                    Color(hue: 0.72, saturation: 0.75, brightness: 0.22),
-                    Color(hue: 0.62, saturation: 0.55, brightness: 0.32),
-                    Color(hue: 0.70, saturation: 0.70, brightness: 0.26),
-                    Color(hue: 0.65, saturation: 0.60, brightness: 0.38),
-                    Color(hue: 0.75, saturation: 0.65, brightness: 0.28),
-                    Color(hue: 0.62, saturation: 0.50, brightness: 0.24),
-                    Color(hue: 0.68, saturation: 0.75, brightness: 0.28),
-                    Color(hue: 0.72, saturation: 0.65, brightness: 0.26)
-                ]
+                colors: gradientColors
             )
             .ignoresSafeArea()
             .animation(.easeInOut(duration: 7).repeatForever(autoreverses: true), value: animate)
@@ -262,7 +280,7 @@ private struct WelcomeView: View {
             VStack(spacing: 32) {
                 Image(systemName: "square.3.layers.3d")
                     .font(.system(size: 80, weight: .thin))
-                    .foregroundStyle(.white.opacity(0.9))
+                    .foregroundStyle(.primary.opacity(0.85))
                     .symbolRenderingMode(.hierarchical)
                     .padding(24)
                     .glassEffect(in: .circle)
@@ -270,10 +288,10 @@ private struct WelcomeView: View {
                 VStack(spacing: 10) {
                     Text("MacDirStat")
                         .font(.system(size: 34, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
                     Text("Visualize your disk space usage at a glance")
                         .font(.body)
-                        .foregroundStyle(.white.opacity(0.7))
+                        .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 }
 
@@ -284,7 +302,7 @@ private struct WelcomeView: View {
 
                 Text("Or drop a folder anywhere")
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(.tertiary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 6)
                     .glassEffect(in: .capsule)
@@ -358,8 +376,8 @@ private struct FullDiskAccessBanner: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 9)
-        .background(.orange.opacity(0.12))
-        .overlay(alignment: .bottom) { Divider() }
+        .background(.orange.opacity(0.15))
+        .overlay(alignment: .bottom) { Divider().overlay(.orange.opacity(0.3)) }
     }
 }
 
