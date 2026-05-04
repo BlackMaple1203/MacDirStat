@@ -62,18 +62,12 @@ struct ExtensionListView: View {
 
                 // Quick-action buttons
                 HStack(spacing: 4) {
-                    iconButton("doc.on.clipboard", help: "Copy path") {
+                    iconButton("doc.on.doc.fill", help: "Copy path") {
                         NSPasteboard.general.clearContents()
                         NSPasteboard.general.setString(node.url.path, forType: .string)
                     }
-                    iconButton("folder.viewfinder", help: "Reveal in Finder") {
+                    iconButton("folder.fill", help: "Reveal in Finder") {
                         NSWorkspace.shared.activateFileViewerSelecting([node.url])
-                    }
-                    if node.isDirectory {
-                        iconButton("arrow.down.right.circle",
-                                   help: "Open in chart") {
-                            vm.drillDown(into: node)
-                        }
                     }
                 }
             }
