@@ -1,8 +1,14 @@
 import SwiftUI
+import Sparkle
 
 @main
 struct MacDirStatApp: App {
     @StateObject private var vm = ScanViewModel()
+    private let updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: nil,
+        userDriverDelegate: nil
+    )
 
     var body: some Scene {
         WindowGroup("MacDirStat") {
@@ -25,6 +31,12 @@ struct MacDirStatApp: App {
                     NotificationCenter.default.post(name: .exportCSV, object: nil)
                 }
                 .keyboardShortcut("e", modifiers: [.command, .shift])
+            }
+            CommandGroup(after: .appInfo) {
+                Button("Check for Updates…") {
+                    updaterController.updater.checkForUpdates()
+                }
+                .disabled(!updaterController.updater.canCheckForUpdates)
             }
         }
     }

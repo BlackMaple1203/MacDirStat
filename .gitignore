@@ -24,3 +24,10 @@ DerivedData/
 
 # Test results
 *.xcresult
+
+# Amore / Sparkle private signing keys — NEVER commit these
+*.private
+sparkle_private_key
+amore_private_key
+*.p12
+*.cer

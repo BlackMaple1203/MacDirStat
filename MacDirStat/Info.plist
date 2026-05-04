@@ -32,5 +32,9 @@
 	<string>MacDirStat needs Full Disk Access to accurately show the size of all files and folders on your Mac, including protected system and user data.</string>
 	<key>CFBundleDocumentTypes</key>
 	<array/>
+	<key>SUFeedURL</key>
+	<string>AMORE_APPCAST_URL_PLACEHOLDER</string>
+	<key>SUPublicEDKey</key>
+	<string>AMORE_PUBLIC_KEY_PLACEHOLDER</string>
 </dict>
 </plist>
