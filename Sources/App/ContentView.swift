@@ -406,6 +406,15 @@ private struct DashboardSettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+
+                Button {
+                    NotificationCenter.default.post(name: .checkForUpdates, object: nil)
+                } label: {
+                    Label("Check for Updates…", systemImage: "arrow.trianglehead.clockwise")
+                        .font(.system(size: 12))
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
             }
             .padding()
 
@@ -437,6 +446,7 @@ private struct DashboardSettingsView: View {
 
 extension Notification.Name {
     static let exportCSV = Notification.Name("MacDirStat.exportCSV")
+    static let checkForUpdates = Notification.Name("MacDirStat.checkForUpdates")
 }
 
 @MainActor

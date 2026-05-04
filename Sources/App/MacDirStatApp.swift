@@ -14,6 +14,9 @@ struct MacDirStatApp: App {
         WindowGroup("MacDirStat") {
             ContentView()
                 .environmentObject(vm)
+                .onReceive(NotificationCenter.default.publisher(for: .checkForUpdates)) { _ in
+                    updaterController.updater.checkForUpdates()
+                }
         }
         .defaultSize(width: 1200, height: 800)
         Settings {
