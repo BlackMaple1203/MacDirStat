@@ -46,10 +46,6 @@ MacDirStat scans any folder and turns your filesystem into an interactive sunbur
 
 ## Install
 
-**TestFlight Beta**
-
-[**Join the beta →**](https://testflight.apple.com/join/7781t9jP)
-
 **Mac App Store** *(coming soon)*
 
 **Build from source**
