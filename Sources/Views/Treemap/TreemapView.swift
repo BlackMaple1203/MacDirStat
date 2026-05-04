@@ -324,6 +324,22 @@ private struct HoverTooltip: View {
                     .foregroundStyle(.tertiary)
                     .lineLimit(2)
                     .truncationMode(.middle)
+
+                if let reason = SafetyAnalyzer.reason(for: node) {
+                    HStack(spacing: 5) {
+                        Image(systemName: node.safetyLevel == .safe
+                              ? "checkmark.circle.fill"
+                              : "exclamationmark.triangle.fill")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(node.safetyLevel == .safe ? .green : .red)
+                        Text(reason)
+                            .font(.caption)
+                            .foregroundStyle(node.safetyLevel == .safe
+                                             ? Color.green.opacity(0.9)
+                                             : Color.red.opacity(0.9))
+                    }
+                    .padding(.top, 2)
+                }
             }
         }
         .padding(.horizontal, 12)

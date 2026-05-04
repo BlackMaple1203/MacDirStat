@@ -118,6 +118,17 @@ private struct NodeRow: View {
 
             Spacer(minLength: 4)
 
+            // Safety indicator — only shown for safe (green) and danger (red), not caution
+            if node.safetyLevel == .safe {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 9))
+                    .foregroundStyle(.green.opacity(0.8))
+            } else if node.safetyLevel == .danger {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 9))
+                    .foregroundStyle(.red.opacity(0.8))
+            }
+
             // Size
             Text(ByteFormatter.string(from: node.size))
                 .font(.system(size: 11, design: .monospaced))

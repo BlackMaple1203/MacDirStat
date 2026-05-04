@@ -96,11 +96,10 @@ public final class ScanViewModel: ObservableObject {
                 case .completed(let node):
                     self.isScanning = false
                     self.isComputingLayout = true   // keep spinner until treemap is ready
-                    // Sort all children by size once, off-thread, so every downstream
-                    // consumer (DirectoryTree, TreemapLayout) reads pre-sorted data and
-                    // never needs to sort again — eliminates all main-thread sort freezes.
+                    // Sort + safety-tag the entire tree off-thread before exposing it to the UI.
                     await Task.detached(priority: .userInitiated) {
                         Self.sortAllChildren(node: node)
+                        Self.tagSafetyLevels(node: node)
                     }.value
                     self.root = node
                     let map = ExtensionColorMap(root: node)
@@ -229,6 +228,15 @@ public final class ScanViewModel: ObservableObject {
         guard myGen == layoutGeneration else { return }
         self.cells = computed
         self.isComputingLayout = false
+    }
+
+    private nonisolated static func tagSafetyLevels(node: FSNode) {
+        var stack: [FSNode] = [node]
+        while !stack.isEmpty {
+            let n = stack.removeLast()
+            n.safetyLevel = SafetyAnalyzer.level(for: n)
+            stack.append(contentsOf: n.children)
+        }
     }
 
     private nonisolated static func sortAllChildren(node: FSNode) {
