@@ -137,9 +137,9 @@ private struct NodeRow: View {
         }
         .padding(.vertical, 3)
         .padding(.horizontal, 4)
-        .glassEffect(
-            .regular.tint(isSelected ? Color.accentColor.opacity(0.5) : Color.clear).interactive(),
-            in: .rect(cornerRadius: 6)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(isSelected ? Color.accentColor.opacity(0.18) : Color.clear)
         )
     }
 
