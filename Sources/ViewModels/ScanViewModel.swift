@@ -18,6 +18,7 @@ public final class ScanViewModel: ObservableObject {
     @Published public var scanURL: URL?
     @Published public var extensionSummaries: [ExtensionSummary] = []
     @Published public var duplicateGroups: [[FSNode]] = []
+    @Published public var hasFullDiskAccess: Bool = true
 
     public var treemapRoot: FSNode? { drillStack.last ?? root }
 
@@ -30,6 +31,13 @@ public final class ScanViewModel: ObservableObject {
 
     public init() {
         setupMemoryPressureHandler()
+        checkFullDiskAccess()
+    }
+
+    private func checkFullDiskAccess() {
+        // TCC.db is only readable when Full Disk Access is granted
+        let probe = "/Library/Application Support/com.apple.TCC/TCC.db"
+        hasFullDiskAccess = FileManager.default.isReadableFile(atPath: probe)
     }
 
     private func setupMemoryPressureHandler() {

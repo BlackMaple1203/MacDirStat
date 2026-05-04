@@ -173,12 +173,17 @@ struct ContentView: View {
 
     @ViewBuilder
     private var detailContent: some View {
-        if vm.root == nil && !vm.isScanning && !vm.isComputingLayout {
-            WelcomeView()
-        } else if activeTab == .duplicates {
-            duplicatesContent
-        } else {
-            treemapContent
+        VStack(spacing: 0) {
+            if !vm.hasFullDiskAccess {
+                FullDiskAccessBanner()
+            }
+            if vm.root == nil && !vm.isScanning && !vm.isComputingLayout {
+                WelcomeView()
+            } else if activeTab == .duplicates {
+                duplicatesContent
+            } else {
+                treemapContent
+            }
         }
     }
 
@@ -322,6 +327,39 @@ private struct FolderTitleView: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 4)
         .glassEffect(in: .capsule)
+    }
+}
+
+// MARK: - Full Disk Access banner
+
+private struct FullDiskAccessBanner: View {
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "lock.shield")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(.orange)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Full Disk Access required for complete results")
+                    .font(.system(size: 12, weight: .semibold))
+                Text("Go to System Settings → Privacy & Security → Full Disk Access and add MacDirStat.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Button("Open Settings") {
+                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")!)
+            }
+            .font(.system(size: 11, weight: .medium))
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 9)
+        .background(.orange.opacity(0.12))
+        .overlay(alignment: .bottom) { Divider() }
     }
 }
 
