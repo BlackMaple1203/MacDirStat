@@ -10,7 +10,8 @@ A fast, beautiful macOS disk usage visualizer — built entirely in Swift.</p>
 [![macOS](https://img.shields.io/badge/macOS-14%2B-black?style=flat-square&logo=apple)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.10-F05138?style=flat-square&logo=swift)](https://swift.org)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](./LICENSE)
-![App Store](https://img.shields.io/badge/App%20Store-Coming%20Soon-999999?style=flat-square&logo=appstore)
+[![Download](https://img.shields.io/badge/Download-v1.0-007AFF?style=flat-square&logo=apple)](https://github.com/Ti-03/MacDirStat/releases)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-FF5E5B?style=flat-square&logo=ko-fi)](https://ko-fi.com/ti003)
 
 </div>
 
@@ -46,7 +47,9 @@ MacDirStat scans any folder and turns your filesystem into an interactive sunbur
 
 ## Install
 
-**Mac App Store** *(coming soon)*
+**[Download MacDirStat 1.0](https://github.com/Ti-03/MacDirStat/releases)**
+
+Open the DMG and drag MacDirStat to your Applications folder. MacDirStat is coming to the Mac App Store. While it goes through Apple's review process, you can download it directly here for free. The app updates itself automatically via the Help menu once installed.
 
 **Build from source**
 
@@ -86,5 +89,5 @@ If you find it useful, the App Store version *(coming soon)* will be the best wa
 ---
 
 <div align="center">
-Built with ❤️ by &nbsp;·&nbsp; <a href="https://ti0.me/">Ti</a> &nbsp;·&nbsp; 
+Built with ❤️ by <a href="https://ti0.me/">Ti</a> &nbsp;·&nbsp; <a href="https://ko-fi.com/ti003">Support on Ko-fi</a>
 </div>
