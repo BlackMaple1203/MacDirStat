@@ -96,6 +96,15 @@ struct TreemapView: View {
                     description: Text("This folder contains no files"))
             }
 
+            // ── Live indicator ───────────────────────────────────────────────
+            if vm.isWatching {
+                LiveBadge()
+                    .padding(10)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .allowsHitTesting(false)
+                    .transition(.opacity.animation(.easeInOut(duration: 0.3)))
+            }
+
             // ── Hover tooltip ────────────────────────────────────────────────
             if let cell = hoveredCell {
                 HoverTooltip(node: cell.node)
@@ -349,5 +358,28 @@ private struct HoverTooltip: View {
             .regular.tint(node.isDirectory ? Color.clear : FileTypeIcon.color(for: node).opacity(0.25)),
             in: .rect(cornerRadius: 14)
         )
+    }
+}
+
+// MARK: - Live badge
+
+private struct LiveBadge: View {
+    @State private var pulse = false
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Circle()
+                .fill(Color.green)
+                .frame(width: 6, height: 6)
+                .opacity(pulse ? 0.4 : 1.0)
+                .animation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true), value: pulse)
+                .onAppear { pulse = true }
+            Text("Live")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 7)
+        .padding(.vertical, 4)
+        .glassEffect(in: .capsule)
     }
 }

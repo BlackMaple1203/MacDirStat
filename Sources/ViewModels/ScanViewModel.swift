@@ -19,10 +19,13 @@ public final class ScanViewModel: ObservableObject {
     @Published public var extensionSummaries: [ExtensionSummary] = []
     @Published public var duplicateGroups: [[FSNode]] = []
     @Published public var hasFullDiskAccess: Bool = true
+    @Published public var isWatching: Bool = false
 
     public var treemapRoot: FSNode? { drillStack.last ?? root }
 
     private let scanner = FileScanner()
+    private let fileWatcher = FileWatcher()
+    private var watchTask: Task<Void, Never>?
     private var scanTask: Task<Void, Never>?
     private var extensionTask: Task<Void, Never>?
     private var duplicateTask: Task<Void, Never>?
@@ -70,6 +73,9 @@ public final class ScanViewModel: ObservableObject {
         scanTask?.cancel()
         extensionTask?.cancel()
         duplicateTask?.cancel()
+        watchTask?.cancel()
+        fileWatcher.stop()
+        isWatching = false
         layoutGeneration += 1       // invalidate any in-progress layout
         scanURL = url
         root = nil
@@ -107,6 +113,9 @@ public final class ScanViewModel: ObservableObject {
                     await self.recomputeLayout()
                     // isComputingLayout set to false inside recomputeLayout
 
+                    // Start live file watching
+                    self.startWatching(url: url)
+
                     // Extension summaries: potentially millions of nodes — run off main actor
                     self.extensionTask = Task.detached(priority: .userInitiated) { [node, map, weak self] in
                         let summaries = Self.buildExtensionSummaries(root: node, map: map)
@@ -141,12 +150,146 @@ public final class ScanViewModel: ObservableObject {
         scanTask?.cancel()
         extensionTask?.cancel()
         duplicateTask?.cancel()
+        watchTask?.cancel()
+        fileWatcher.stop()
         layoutGeneration += 1
         isScanning = false
         isComputingLayout = false
+        isWatching = false
         scanURL = nil
         securityScopedURL?.stopAccessingSecurityScopedResource()
         securityScopedURL = nil
+    }
+
+    // MARK: - Live watching
+
+    private func startWatching(url: URL) {
+        watchTask?.cancel()
+        isWatching = false
+
+        // Channel to bridge FileWatcher callback → async sequence
+        let (stream, continuation) = AsyncStream<[String]>.makeStream()
+
+        fileWatcher.start(watching: url) { paths in
+            continuation.yield(paths)
+        }
+        isWatching = true
+
+        watchTask = Task { [weak self] in
+            for await changedPaths in stream {
+                guard !Task.isCancelled else { break }
+                await self?.handleFileSystemChanges(changedPaths)
+            }
+        }
+    }
+
+    private func handleFileSystemChanges(_ paths: [String]) async {
+        guard let root else { return }
+
+        // Collect the unique directory paths that changed
+        var dirPaths = Set<String>()
+        for path in paths {
+            var isDir: ObjCBool = false
+            if FileManager.default.fileExists(atPath: path, isDirectory: &isDir), isDir.boolValue {
+                dirPaths.insert(path)
+            } else {
+                dirPaths.insert((path as NSString).deletingLastPathComponent)
+            }
+        }
+
+        var needsLayout = false
+        for dirPath in dirPaths {
+            guard let node = Self.findNode(path: dirPath, in: root) else { continue }
+            let changed = await Task.detached(priority: .userInitiated) {
+                Self.refreshDirectory(node: node)
+            }.value
+            if changed {
+                Self.bubbleUpSizes(from: node)
+                needsLayout = true
+            }
+        }
+
+        if needsLayout {
+            await recomputeLayout()
+        }
+    }
+
+    // Walk the tree by path components to find the FSNode for a given path.
+    private nonisolated static func findNode(path: String, in root: FSNode) -> FSNode? {
+        let rootPath = root.url.path
+        guard path.hasPrefix(rootPath) else { return nil }
+        if path == rootPath { return root }
+
+        let relative = String(path.dropFirst(rootPath.count))
+        let components = relative.split(separator: "/").map(String.init)
+        var current = root
+        for component in components {
+            guard let child = current.children.first(where: { $0.name == component }) else { return nil }
+            current = child
+        }
+        return current
+    }
+
+    // Re-stat the directory on disk and update children to match.
+    // Returns true if anything changed (additions/removals/size changes).
+    @discardableResult
+    private nonisolated static func refreshDirectory(node: FSNode) -> Bool {
+        guard node.isDirectory else { return false }
+        let fm = FileManager.default
+        guard let entries = try? fm.contentsOfDirectory(
+            at: node.url,
+            includingPropertiesForKeys: [.fileSizeKey, .isDirectoryKey, .isSymbolicLinkKey],
+            options: [.skipsHiddenFiles]
+        ) else { return false }
+
+        let onDisk = Dictionary(uniqueKeysWithValues: entries.map { ($0.lastPathComponent, $0) })
+        var changed = false
+
+        // Remove children that no longer exist
+        let before = node.children.count
+        node.children.removeAll { !onDisk.keys.contains($0.name) }
+        if node.children.count != before { changed = true }
+
+        // Add or update children
+        for (name, url) in onDisk {
+            if let existing = node.children.first(where: { $0.name == name }) {
+                // Update size for files (directories update via recursive bubble)
+                if !existing.isDirectory,
+                   let attrs = try? url.resourceValues(forKeys: [.fileSizeKey]),
+                   let newSize = attrs.fileSize.map(Int64.init) {
+                    if existing.size != newSize {
+                        existing.size = newSize
+                        changed = true
+                    }
+                }
+            } else {
+                // New entry — create a minimal FSNode
+                let attrs = try? url.resourceValues(forKeys: [.fileSizeKey, .isDirectoryKey])
+                let isDir = attrs?.isDirectory ?? false
+                let size = (attrs?.fileSize).map(Int64.init) ?? 0
+                let ext = isDir ? "" : url.pathExtension.lowercased()
+                let child = FSNode(url: url, name: name, isDirectory: isDir, size: size, fileExtension: ext, parent: node)
+                child.safetyLevel = SafetyAnalyzer.level(for: child)
+                node.children.append(child)
+                changed = true
+            }
+        }
+
+        if changed {
+            node.children.sort { $0.size > $1.size }
+        }
+        return changed
+    }
+
+    // Walk up the parent chain recalculating folder sizes from their children.
+    private nonisolated static func bubbleUpSizes(from node: FSNode) {
+        var current: FSNode? = node
+        while let n = current {
+            if n.isDirectory {
+                n.size = n.children.reduce(0) { $0 + $1.size }
+            }
+            current = n.parent
+        }
     }
 
     public func updateLayoutSize(_ size: CGSize) {
