@@ -24,6 +24,8 @@ public final class ScanViewModel: ObservableObject {
 
     private let scanner = FileScanner()
     private var scanTask: Task<Void, Never>?
+    private var extensionTask: Task<Void, Never>?
+    private var duplicateTask: Task<Void, Never>?
     private var layoutSize: CGSize = .zero
     private var layoutGeneration: Int = 0
     private var securityScopedURL: URL?
@@ -32,6 +34,10 @@ public final class ScanViewModel: ObservableObject {
     public init() {
         setupMemoryPressureHandler()
         checkFullDiskAccess()
+    }
+
+    deinit {
+        memoryPressureSource?.cancel()
     }
 
     private func checkFullDiskAccess() {
@@ -62,6 +68,8 @@ public final class ScanViewModel: ObservableObject {
         }
 
         scanTask?.cancel()
+        extensionTask?.cancel()
+        duplicateTask?.cancel()
         layoutGeneration += 1       // invalidate any in-progress layout
         scanURL = url
         root = nil
@@ -95,18 +103,23 @@ public final class ScanViewModel: ObservableObject {
                     // isComputingLayout set to false inside recomputeLayout
 
                     // Extension summaries: potentially millions of nodes — run off main actor
-                    Task.detached(priority: .userInitiated) { [node, map] in
+                    self.extensionTask = Task.detached(priority: .userInitiated) { [node, map, weak self] in
                         let summaries = Self.buildExtensionSummaries(root: node, map: map)
-                        await MainActor.run { self.extensionSummaries = summaries }
+                        guard !Task.isCancelled else { return }
+                        let vm = self
+                        await MainActor.run { vm?.extensionSummaries = summaries }
                     }
                     // Duplicate detection: lower priority, also off main actor
-                    Task.detached(priority: .utility) { [node] in
+                    self.duplicateTask = Task.detached(priority: .utility) { [node, weak self] in
                         let detector = DuplicateDetector()
                         await detector.detect(in: node)
+                        guard !Task.isCancelled else { return }
                         let groups = Self.buildDuplicateGroups(root: node)
+                        guard !Task.isCancelled else { return }
+                        let vm = self
                         await MainActor.run {
-                            self.duplicatesReady = true
-                            self.duplicateGroups = groups
+                            vm?.duplicatesReady = true
+                            vm?.duplicateGroups = groups
                         }
                     }
                 case .failed(let msg):
@@ -121,6 +134,8 @@ public final class ScanViewModel: ObservableObject {
     public func cancelScan() {
         Task { await scanner.cancel() }
         scanTask?.cancel()
+        extensionTask?.cancel()
+        duplicateTask?.cancel()
         layoutGeneration += 1
         isScanning = false
         isComputingLayout = false
