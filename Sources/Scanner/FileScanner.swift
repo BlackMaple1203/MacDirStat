@@ -1,5 +1,26 @@
 import Foundation
 
+// Thread-safe set tracking visited (dev, ino) pairs to prevent double-counting.
+// On macOS, /System/Volumes/Data/Applications shares the same inode as /Applications, etc.
+private final class VisitedSet: @unchecked Sendable {
+    private var lock = os_unfair_lock()
+    private var set = Set<DevIno>()
+
+    private struct DevIno: Hashable {
+        let dev: dev_t
+        let ino: ino_t
+    }
+
+    // Returns true if this (dev, ino) was NOT previously seen (and marks it seen).
+    func visit(dev: dev_t, ino: ino_t) -> Bool {
+        let key = DevIno(dev: dev, ino: ino)
+        os_unfair_lock_lock(&lock)
+        let inserted = set.insert(key).inserted
+        os_unfair_lock_unlock(&lock)
+        return inserted
+    }
+}
+
 // Thread-safe progress counter using os_unfair_lock
 private final class ProgressCounter: @unchecked Sendable {
     private var lock = os_unfair_lock()
@@ -36,6 +57,7 @@ public actor FileScanner {
 
         activeTask = Task {
             let counter = ProgressCounter()
+            let visited = VisitedSet()
             // Get the root device ID to detect mount points
             var rootStat = stat()
             let rootDev: dev_t? = (stat(url.path, &rootStat) == 0) ? rootStat.st_dev : nil
@@ -50,7 +72,7 @@ public actor FileScanner {
             }
 
             do {
-                let root = try await _buildTree(path: url.path, url: url, parent: nil, rootDev: rootDev, counter: counter)
+                let root = try await _buildTree(path: url.path, url: url, parent: nil, rootDev: rootDev, counter: counter, visited: visited)
                 progressTask.cancel()
                 continuation.yield(.completed(root: root))
             } catch is CancellationError {
@@ -73,7 +95,8 @@ private func _buildTree(
     url: URL,
     parent: FSNode?,
     rootDev: dev_t?,
-    counter: ProgressCounter
+    counter: ProgressCounter,
+    visited: VisitedSet
 ) async throws -> FSNode {
     try Task.checkCancellation()
 
@@ -84,13 +107,20 @@ private func _buildTree(
     if st.st_mode & S_IFMT == S_IFLNK { throw SkipError() }
 
     let isDir = st.st_mode & S_IFMT == S_IFDIR
+
+    // Deduplicate directories by (dev, ino) — prevents double-counting paths like
+    // /Applications and /System/Volumes/Data/Applications (same inode, different paths).
+    if isDir {
+        guard visited.visit(dev: st.st_dev, ino: st.st_ino) else { throw SkipError() }
+    }
+
     let name = url.lastPathComponent
     let ext = isDir ? "" : url.pathExtension.lowercased()
 
     let node = FSNode(url: url, name: name, isDirectory: isDir, size: 0, fileExtension: ext, parent: parent)
 
     if isDir {
-        let listing = _listDirectory(path: path, url: url, rootDev: rootDev, node: node, counter: counter)
+        let listing = _listDirectory(path: path, url: url, rootDev: rootDev, node: node, counter: counter, visited: visited)
 
         // Accumulate direct file sizes immediately
         node.size = listing.totalSize
@@ -105,7 +135,7 @@ private func _buildTree(
                         // Propagate cancellation; silently skip symlinks / unreadable entries.
                         try Task.checkCancellation()
                         do {
-                            return try await _buildTree(path: subPath, url: subURL, parent: node, rootDev: rootDev, counter: counter)
+                            return try await _buildTree(path: subPath, url: subURL, parent: node, rootDev: rootDev, counter: counter, visited: visited)
                         } catch is SkipError {
                             return nil
                         }
@@ -143,7 +173,7 @@ private struct DirectoryContents {
     var itemCount: Int           // count of items processed here
 }
 
-private func _listDirectory(path: String, url: URL, rootDev: dev_t?, node: FSNode, counter: ProgressCounter) -> DirectoryContents {
+private func _listDirectory(path: String, url: URL, rootDev: dev_t?, node: FSNode, counter: ProgressCounter, visited: VisitedSet) -> DirectoryContents {
     var result = DirectoryContents(children: [], subdirPaths: [], totalSize: 0, itemCount: 0)
 
     guard let dir = opendir(path) else { return result }
