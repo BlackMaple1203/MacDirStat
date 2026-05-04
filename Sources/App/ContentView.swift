@@ -51,7 +51,7 @@ struct ContentView: View {
                 if activeTab == .treemap {
                     if vm.root != nil {
                         Button {
-                            withAnimation(.easeInOut(duration: 0.2)) { userWantsTree.toggle() }
+                            userWantsTree.toggle()
                         } label: {
                             Image(systemName: "sidebar.left")
                                 .symbolVariant(showTree ? .none : .slash)
@@ -86,11 +86,9 @@ struct ContentView: View {
             }
         }
         .onChange(of: vm.isScanning) { _, scanning in
-            withAnimation(.easeInOut(duration: 0.2)) { scanHidesTree = scanning }
-            // Return to treemap tab when a new scan starts
-            if scanning { withAnimation { activeTab = .treemap } }
+            scanHidesTree = scanning
+            if scanning { activeTab = .treemap }
         }
-        .animation(.easeInOut(duration: 0.2), value: vm.isScanning || vm.isComputingLayout)
         .onReceive(NotificationCenter.default.publisher(for: .exportCSV)) { _ in
             vm.exportCSV()
         }

@@ -29,6 +29,7 @@ public final class ScanViewModel: ObservableObject {
     private var scanTask: Task<Void, Never>?
     private var extensionTask: Task<Void, Never>?
     private var duplicateTask: Task<Void, Never>?
+    private var layoutDebounceTask: Task<Void, Never>?
     private var layoutSize: CGSize = .zero
     private var layoutGeneration: Int = 0
     private var securityScopedURL: URL?
@@ -295,7 +296,14 @@ public final class ScanViewModel: ObservableObject {
     public func updateLayoutSize(_ size: CGSize) {
         guard size != layoutSize, size.width > 1, size.height > 1 else { return }
         layoutSize = size
-        Task { await recomputeLayout() }
+        // Debounce: skip intermediate sizes during animations/resize drags.
+        // Only the last size in a burst triggers a layout computation.
+        layoutDebounceTask?.cancel()
+        layoutDebounceTask = Task {
+            try? await Task.sleep(for: .milliseconds(80))
+            guard !Task.isCancelled else { return }
+            await recomputeLayout()
+        }
     }
 
     public func drillDown(into node: FSNode) {
