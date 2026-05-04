@@ -105,6 +105,7 @@ struct TreemapView: View {
                     .transition(.opacity.animation(.easeInOut(duration: 0.12)))
             }
         }
+        .clipped()
         .contextMenu { contextMenuContent() }
     }
 
@@ -259,14 +260,14 @@ struct TreemapView: View {
                     identity: DrillEffect(scale: 1.00, rotation:  0, opacity: 1, blur: 0, anchor: a)
                 ),
                 removal: .modifier(
-                    active:   DrillEffect(scale: 1.18, rotation:  4, opacity: 0, blur: 5, anchor: a),
+                    active:   DrillEffect(scale: 1.08, rotation:  4, opacity: 0, blur: 5, anchor: a),
                     identity: DrillEffect(scale: 1.00, rotation:  0, opacity: 1, blur: 0, anchor: a)
                 )
             )
         } else {
             return .asymmetric(
                 insertion: .modifier(
-                    active:   DrillEffect(scale: 1.18, rotation:  4, opacity: 0, blur: 5, anchor: .center),
+                    active:   DrillEffect(scale: 1.08, rotation:  4, opacity: 0, blur: 5, anchor: .center),
                     identity: DrillEffect(scale: 1.00, rotation:  0, opacity: 1, blur: 0, anchor: .center)
                 ),
                 removal: .modifier(

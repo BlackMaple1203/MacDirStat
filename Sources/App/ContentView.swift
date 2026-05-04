@@ -234,7 +234,6 @@ struct ContentView: View {
 private struct WelcomeView: View {
     @EnvironmentObject private var vm: ScanViewModel
     @Environment(\.colorScheme) private var colorScheme
-    @State private var animate = false
 
     private var isDark: Bool { colorScheme == .dark }
 
@@ -269,13 +268,12 @@ private struct WelcomeView: View {
                 width: 3, height: 3,
                 points: [
                     .init(0, 0), .init(0.5, 0), .init(1, 0),
-                    .init(0, 0.5), animate ? .init(0.55, 0.42) : .init(0.45, 0.58), .init(1, 0.5),
+                    .init(0, 0.5), .init(0.5, 0.5), .init(1, 0.5),
                     .init(0, 1), .init(0.5, 1), .init(1, 1)
                 ],
                 colors: gradientColors
             )
-            .ignoresSafeArea()
-            .animation(.easeInOut(duration: 7).repeatForever(autoreverses: true), value: animate)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             VStack(spacing: 32) {
                 Image(systemName: "square.3.layers.3d")
@@ -312,7 +310,7 @@ private struct WelcomeView: View {
             .frame(maxWidth: 440)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .onAppear { animate = true }
+        .clipped()
     }
 }
 
