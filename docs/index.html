@@ -9,13 +9,15 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0d0f12;
-      --surface: #161920;
+      --bg: #09090b;
+      --surface: #111115;
+      --surface2: #18181d;
       --border: rgba(255,255,255,0.07);
-      --text: #f0f2f5;
-      --muted: #8b8fa8;
-      --accent: #4f8ef7;
-      --orange: #f5a623;
+      --text: #f4f4f6;
+      --muted: #71717a;
+      --accent: #6366f1;
+      --accent2: #818cf8;
+      --green: #22c55e;
     }
 
     body {
@@ -30,12 +32,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 48px;
+      padding: 18px 48px;
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
-      background: rgba(13,15,18,0.85);
-      backdrop-filter: blur(12px);
+      background: rgba(9,9,11,0.88);
+      backdrop-filter: blur(16px);
       z-index: 100;
     }
     .nav-brand {
@@ -45,10 +47,10 @@
       text-decoration: none;
       color: var(--text);
       font-weight: 600;
-      font-size: 17px;
+      font-size: 16px;
     }
-    .nav-brand img { width: 30px; height: 30px; border-radius: 7px; }
-    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-brand img { width: 28px; height: 28px; border-radius: 7px; }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
     .nav-links a {
       color: var(--muted);
       text-decoration: none;
@@ -59,9 +61,9 @@
     .btn {
       background: var(--accent);
       color: #fff;
-      padding: 8px 18px;
+      padding: 7px 16px;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       text-decoration: none;
       transition: opacity 0.2s;
@@ -71,62 +73,80 @@
     /* HERO */
     .hero {
       text-align: center;
-      padding: 100px 24px 80px;
+      padding: 110px 24px 80px;
       max-width: 760px;
       margin: 0 auto;
     }
     .hero-logo {
-      width: 100px;
-      height: 100px;
+      width: 96px;
+      height: 96px;
       border-radius: 22px;
-      margin-bottom: 28px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      margin-bottom: 32px;
+      box-shadow: 0 24px 64px rgba(99,102,241,0.25), 0 8px 24px rgba(0,0,0,0.6);
     }
     .hero h1 {
-      font-size: clamp(38px, 6vw, 56px);
+      font-size: clamp(36px, 6vw, 54px);
       font-weight: 700;
       letter-spacing: -1.5px;
       line-height: 1.1;
       margin-bottom: 18px;
+      background: linear-gradient(135deg, #fff 40%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     .hero p {
-      font-size: 19px;
+      font-size: 18px;
       color: var(--muted);
-      max-width: 500px;
+      max-width: 480px;
       margin: 0 auto 36px;
+      line-height: 1.7;
     }
-    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
     .btn-large {
-      padding: 13px 28px;
+      padding: 12px 26px;
       border-radius: 10px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       text-decoration: none;
-      transition: opacity 0.2s;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(99,102,241,0.35);
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 8px 32px rgba(99,102,241,0.45); }
     .btn-secondary {
-      background: var(--surface);
+      background: var(--surface2);
       color: var(--text);
       border: 1px solid var(--border);
     }
-    .btn-large:hover { opacity: 0.85; }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-1px); }
 
     /* BADGES */
     .badges {
       display: flex;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
       margin-top: 28px;
     }
     .badge {
-      background: var(--surface);
+      background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 5px 14px;
+      padding: 4px 12px;
       font-size: 12px;
       color: var(--muted);
+    }
+    .badge.live {
+      border-color: rgba(34,197,94,0.3);
+      color: var(--green);
+      background: rgba(34,197,94,0.08);
     }
 
     /* SCREENSHOTS */
@@ -139,7 +159,7 @@
       border-radius: 14px;
       overflow: hidden;
       border: 1px solid var(--border);
-      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
       margin-bottom: 16px;
     }
     .screenshot-main img { width: 100%; display: block; }
@@ -158,42 +178,44 @@
     }
     .section-label {
       text-align: center;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
-      letter-spacing: 1.5px;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 14px;
+      color: var(--accent2);
+      margin-bottom: 12px;
     }
     .section-title {
       text-align: center;
-      font-size: clamp(28px, 4vw, 38px);
+      font-size: clamp(26px, 4vw, 36px);
       font-weight: 700;
       letter-spacing: -0.8px;
-      margin-bottom: 56px;
+      margin-bottom: 52px;
     }
     .features-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
+      gap: 16px;
     }
     .feature-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 28px;
+      padding: 26px;
+      transition: border-color 0.2s, transform 0.2s;
     }
-    .feature-icon {
-      font-size: 26px;
-      margin-bottom: 14px;
+    .feature-card:hover {
+      border-color: rgba(99,102,241,0.3);
+      transform: translateY(-2px);
     }
-    .feature-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-    .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+    .feature-icon { font-size: 24px; margin-bottom: 14px; }
+    .feature-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .feature-card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
 
     /* TECH */
     .tech {
       padding: 80px 24px;
-      max-width: 700px;
+      max-width: 680px;
       margin: 0 auto;
       text-align: center;
     }
@@ -204,16 +226,57 @@
       text-align: left;
     }
     .tech td {
-      padding: 14px 16px;
+      padding: 13px 16px;
       border-bottom: 1px solid var(--border);
-      font-size: 14px;
+      font-size: 13px;
     }
-    .tech td:first-child { color: var(--muted); width: 120px; }
+    .tech td:first-child { color: var(--muted); width: 110px; }
+
+    /* OTHER APPS */
+    .other-apps {
+      padding: 80px 24px;
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .apps-grid {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 36px;
+    }
+    .app-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 32px;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: border-color 0.2s, transform 0.2s;
+      min-width: 220px;
+    }
+    .app-card:hover {
+      border-color: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+      color: var(--text);
+    }
+    .app-card img {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+    }
+    .app-card-info { text-align: left; }
+    .app-card-info h4 { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+    .app-card-info p { font-size: 12px; color: var(--muted); }
 
     /* FOOTER */
     footer {
       border-top: 1px solid var(--border);
-      padding: 36px 48px;
+      padding: 32px 48px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -221,15 +284,16 @@
       gap: 16px;
     }
     footer p { font-size: 13px; color: var(--muted); }
-    footer a { color: var(--muted); text-decoration: none; }
+    footer a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
     footer a:hover { color: var(--text); }
-    .footer-links { display: flex; gap: 24px; }
+    .footer-links { display: flex; gap: 20px; }
 
     @media (max-width: 600px) {
-      nav { padding: 16px 20px; }
-      .hero { padding: 60px 20px 40px; }
+      nav { padding: 14px 20px; }
+      .hero { padding: 64px 20px 40px; }
       .screenshot-grid { grid-template-columns: 1fr; }
       footer { flex-direction: column; text-align: center; }
+      .footer-links { justify-content: center; }
     }
   </style>
 </head>
@@ -242,9 +306,10 @@
     </a>
     <div class="nav-links">
       <a href="#features">Features</a>
+      <a href="http://ti0.me/">ti0.me</a>
       <a href="https://github.com/Ti-03/MacDirStat">GitHub</a>
       <a href="privacy.html">Privacy</a>
-      <a class="btn" href="https://apps.apple.com">App Store</a>
+      <a class="btn" href="https://github.com/Ti-03/MacDirStat/releases">Download</a>
     </div>
   </nav>
 
@@ -253,10 +318,13 @@
     <h1>See where your disk space went.</h1>
     <p>MacDirStat scans any folder and turns your filesystem into a beautiful, interactive visualization. Find duplicates, delete what you don't need, reclaim your space.</p>
     <div class="hero-actions">
-      <a class="btn-large btn-primary" href="https://apps.apple.com">Download on the Mac App Store</a>
+      <a class="btn-large btn-primary" href="https://github.com/Ti-03/MacDirStat/releases">
+        ↓ Download Free
+      </a>
       <a class="btn-large btn-secondary" href="https://github.com/Ti-03/MacDirStat">View Source</a>
     </div>
     <div class="badges">
+      <span class="badge live">Available Now</span>
       <span class="badge">macOS 14+</span>
       <span class="badge">Native Swift</span>
       <span class="badge">No subscription</span>
@@ -327,9 +395,25 @@
     </table>
   </section>
 
+  <section class="other-apps">
+    <p class="section-label">More Apps</p>
+    <h2 class="section-title">Other apps by Ti</h2>
+    <div class="apps-grid">
+      <a class="app-card" href="https://protoys.app/" target="_blank" rel="noopener">
+        <img src="https://protoys.app/logo.webp" alt="ProToys logo" />
+        <div class="app-card-info">
+          <h4>ProToys</h4>
+          <p>Developer tools for macOS</p>
+        </div>
+      </a>
+    </div>
+  </section>
+
   <footer>
-    <p>© 2026 Ti-03 · MacDirStat · <a href="privacy.html">Privacy Policy</a></p>
+    <p>© 2026 <a href="http://ti0.me/">Ti</a> · MacDirStat · <a href="privacy.html">Privacy Policy</a></p>
     <div class="footer-links">
+      <a href="http://ti0.me/">ti0.me</a>
+      <a href="https://ko-fi.com/ti003">Ko-fi</a>
       <a href="https://github.com/Ti-03/MacDirStat">GitHub</a>
       <a href="https://github.com/Ti-03/MacDirStat/issues">Report a Bug</a>
       <a href="privacy.html">Privacy</a>
