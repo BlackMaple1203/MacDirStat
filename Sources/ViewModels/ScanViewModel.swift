@@ -36,8 +36,23 @@ public final class ScanViewModel: ObservableObject {
     private var memoryPressureSource: DispatchSourceMemoryPressure?
 
     public init() {
+        UserDefaults.standard.register(defaults: [
+            "realtimeMonitoring": true,
+            "autoScanLastFolder": false,
+            "showHiddenFiles": false,
+            "useBinarySize": false,
+            "treemapColorScheme": "byType",
+            "showFileCount": false,
+            "excludedFolderNames": ".git,node_modules,DerivedData,.Trash",
+            "defaultTab": "treemap",
+        ])
         setupMemoryPressureHandler()
         checkFullDiskAccess()
+        if UserDefaults.standard.bool(forKey: "autoScanLastFolder"),
+           let path = UserDefaults.standard.string(forKey: "lastScannedPath"),
+           FileManager.default.fileExists(atPath: path) {
+            scan(url: URL(fileURLWithPath: path))
+        }
     }
 
     deinit {
@@ -79,6 +94,7 @@ public final class ScanViewModel: ObservableObject {
         isWatching = false
         layoutGeneration += 1       // invalidate any in-progress layout
         scanURL = url
+        UserDefaults.standard.set(url.path, forKey: "lastScannedPath")
         root = nil
         cells = []
         colorMap = nil
@@ -114,8 +130,10 @@ public final class ScanViewModel: ObservableObject {
                     await self.recomputeLayout()
                     // isComputingLayout set to false inside recomputeLayout
 
-                    // Start live file watching
-                    self.startWatching(url: url)
+                    // Start live file watching (if enabled)
+                    if UserDefaults.standard.bool(forKey: "realtimeMonitoring") {
+                        self.startWatching(url: url)
+                    }
 
                     // Extension summaries: potentially millions of nodes — run off main actor
                     self.extensionTask = Task.detached(priority: .userInitiated) { [node, map, weak self] in
@@ -324,6 +342,12 @@ public final class ScanViewModel: ObservableObject {
 
     public func highlight(extension ext: String?) {
         highlightedExtension = ext
+    }
+
+    public func refreshLayout() {
+        guard let root else { return }
+        colorMap = ExtensionColorMap(root: root)
+        Task { await recomputeLayout() }
     }
 
     private nonisolated static func buildDuplicateGroups(root: FSNode) -> [[FSNode]] {

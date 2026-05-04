@@ -31,16 +31,32 @@ public struct ExtensionColorMap: Equatable, Sendable {
         return m
     }()
 
-    public init(root: FSNode) {}
+    let scheme: String
+
+    public init(root: FSNode) {
+        self.scheme = UserDefaults.standard.string(forKey: "treemapColorScheme") ?? "byType"
+    }
 
     public func color(for fileExtension: String) -> Color {
         let lower = fileExtension.lowercased()
-        if let idx = Self.extIndex[lower] { return Self.palette[idx] }
-        // Unknown extension: stable hash → hue, muted saturation
-        let hash = lower.utf8.reduce(UInt32(5381)) { ($0 &<< 5) &+ $0 &+ UInt32($1) }
-        let hue = Double(hash % 360) / 360.0
-        return Color(hue: hue, saturation: 0.58, brightness: 0.88)
+        switch scheme {
+        case "monochrome":
+            let hash = lower.utf8.reduce(UInt32(5381)) { ($0 &<< 5) &+ $0 &+ UInt32($1) }
+            let brightness = 0.52 + Double(hash % 36) / 100.0
+            return Color(hue: 0.62, saturation: lower.isEmpty ? 0.05 : 0.28, brightness: brightness)
+        case "rainbow":
+            let hash = lower.utf8.reduce(UInt32(5381)) { ($0 &<< 5) &+ $0 &+ UInt32($1) }
+            let hue = Double(hash % 360) / 360.0
+            return Color(hue: hue, saturation: 0.88, brightness: 0.96)
+        default:
+            if let idx = Self.extIndex[lower] { return Self.palette[idx] }
+            let hash = lower.utf8.reduce(UInt32(5381)) { ($0 &<< 5) &+ $0 &+ UInt32($1) }
+            let hue = Double(hash % 360) / 360.0
+            return Color(hue: hue, saturation: 0.58, brightness: 0.88)
+        }
     }
 
-    public static func == (lhs: ExtensionColorMap, rhs: ExtensionColorMap) -> Bool { true }
+    public static func == (lhs: ExtensionColorMap, rhs: ExtensionColorMap) -> Bool {
+        lhs.scheme == rhs.scheme
+    }
 }

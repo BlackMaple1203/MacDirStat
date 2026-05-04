@@ -9,6 +9,8 @@ struct ContentView: View {
     @State private var scanHidesTree = false
     @State private var activeTab: DetailTab = .treemap
     @State private var showingSettings = false
+    @AppStorage("defaultTab") private var defaultTab = "treemap"
+    @AppStorage("treemapColorScheme") private var treemapColorScheme = "byType"
     @Namespace private var tabNamespace
 
     private var showTree: Bool { userWantsTree && !scanHidesTree }
@@ -100,6 +102,10 @@ struct ContentView: View {
         .onChange(of: vm.isScanning) { _, scanning in
             scanHidesTree = scanning
             if scanning { activeTab = .treemap }
+        }
+        .onChange(of: treemapColorScheme) { vm.refreshLayout() }
+        .onAppear {
+            if defaultTab == "duplicates" { activeTab = .duplicates }
         }
         .onReceive(NotificationCenter.default.publisher(for: .exportCSV)) { _ in
             vm.exportCSV()
@@ -393,52 +399,155 @@ private struct FullDiskAccessBanner: View {
 
 private struct DashboardSettingsView: View {
     @AppStorage("hapticFeedbackEnabled") private var hapticEnabled = true
+    @AppStorage("useBinarySize")         private var useBinarySize = false
+    @AppStorage("showHiddenFiles")       private var showHiddenFiles = false
+    @AppStorage("excludedFolderNames")   private var excludedFolderNames = ".git,node_modules,DerivedData,.Trash"
+    @AppStorage("autoScanLastFolder")    private var autoScanLastFolder = false
+    @AppStorage("realtimeMonitoring")    private var realtimeMonitoring = true
+    @AppStorage("defaultTab")            private var defaultTab = "treemap"
+    @AppStorage("treemapColorScheme")    private var treemapColorScheme = "byType"
+    @AppStorage("showFileCount")         private var showFileCount = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Settings")
-                    .font(.headline)
-                Toggle("Haptic feedback", isOn: $hapticEnabled)
-                    .toggleStyle(.switch)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+
+                settingsSection("Appearance") {
+                    row("File size units") {
+                        Picker("", selection: $useBinarySize) {
+                            Text("Decimal").tag(false)
+                            Text("Binary").tag(true)
+                        }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                        .frame(width: 130)
+                    }
+                    caption("Decimal: KB/MB/GB (1000-based). Binary: KiB/MiB/GiB (1024-based).")
+
+                    row("Color scheme") {
+                        Picker("", selection: $treemapColorScheme) {
+                            Text("By Type").tag("byType")
+                            Text("Rainbow").tag("rainbow")
+                            Text("Mono").tag("monochrome")
+                        }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                        .frame(width: 170)
+                    }
+
+                    row("Default tab") {
+                        Picker("", selection: $defaultTab) {
+                            Text("Treemap").tag("treemap")
+                            Text("Duplicates").tag("duplicates")
+                        }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                        .frame(width: 150)
+                    }
+
+                    Toggle("Show item count on chart", isOn: $showFileCount)
+                        .toggleStyle(.switch).controlSize(.small)
+                }
+
+                Divider()
+
+                settingsSection("Files") {
+                    Toggle("Show hidden files", isOn: $showHiddenFiles)
+                        .toggleStyle(.switch).controlSize(.small)
+                    caption("Include dot-files like .DS_Store and .git in scans.")
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Excluded folders")
+                            .font(.system(size: 12))
+                        TextField("Comma-separated names", text: $excludedFolderNames)
+                            .textFieldStyle(.roundedBorder)
+                            .font(.system(size: 11, design: .monospaced))
+                        caption("Folder names to skip during scanning.")
+                    }
+                }
+
+                Divider()
+
+                settingsSection("Behaviour") {
+                    Toggle("Auto-scan last folder on launch", isOn: $autoScanLastFolder)
+                        .toggleStyle(.switch).controlSize(.small)
+                    Toggle("Real-time monitoring", isOn: $realtimeMonitoring)
+                        .toggleStyle(.switch).controlSize(.small)
+                    caption("Watch for file changes after scanning (uses FSEvents).")
+                }
+
+                Divider()
+
+                settingsSection("Trackpad") {
+                    Toggle("Haptic feedback", isOn: $hapticEnabled)
+                        .toggleStyle(.switch).controlSize(.small)
+                    caption("Feel file weights as you explore. Requires Force Touch.")
+                }
+
+                Divider()
+
+                settingsSection("Updates") {
+                    Button {
+                        NotificationCenter.default.post(name: .checkForUpdates, object: nil)
+                    } label: {
+                        Label("Check for Updates…", systemImage: "arrow.trianglehead.clockwise")
+                            .font(.system(size: 12))
+                    }
+                    .buttonStyle(.bordered)
                     .controlSize(.small)
-                Text("Feel file weights as you explore the chart.\nRequires a Force Touch trackpad.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Button {
-                    NotificationCenter.default.post(name: .checkForUpdates, object: nil)
-                } label: {
-                    Label("Check for Updates…", systemImage: "arrow.trianglehead.clockwise")
-                        .font(.system(size: 12))
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-            }
-            .padding()
 
-            Divider()
+                Divider()
 
-            VStack(spacing: 6) {
-                Image(systemName: "square.3.layers.3d")
-                    .font(.system(size: 30, weight: .thin))
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(.primary.opacity(0.8))
-                Text("MacDirStat")
-                    .font(.system(size: 13, weight: .semibold))
-                if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-                    Text("Version \(v)")
+                VStack(spacing: 5) {
+                    Image(systemName: "square.3.layers.3d")
+                        .font(.system(size: 28, weight: .thin))
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(.primary.opacity(0.8))
+                    Text("MacDirStat")
+                        .font(.system(size: 13, weight: .semibold))
+                    if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                        Text("Version \(v)")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    Link("ti0.me", destination: URL(string: "http://ti0.me/")!)
                         .font(.caption)
-                        .foregroundStyle(.secondary)
                 }
-                Link("ti0.me", destination: URL(string: "http://ti0.me/")!)
-                    .font(.caption)
+                .frame(maxWidth: .infinity)
+                .padding()
             }
-            .frame(maxWidth: .infinity)
-            .padding()
         }
-        .frame(width: 250)
+        .frame(width: 300, height: 520)
+    }
+
+    @ViewBuilder
+    private func settingsSection<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+            content()
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+    }
+
+    @ViewBuilder
+    private func row<Content: View>(_ label: String, @ViewBuilder trailing: () -> Content) -> some View {
+        HStack {
+            Text(label).font(.system(size: 12))
+            Spacer()
+            trailing()
+        }
+    }
+
+    @ViewBuilder
+    private func caption(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.tertiary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 

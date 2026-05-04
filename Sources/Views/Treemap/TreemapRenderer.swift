@@ -11,6 +11,7 @@ struct TreemapRenderer {
         highlightedExtension: String?,
         duplicatesReady: Bool,
         pulsePhase: Double,
+        showFileCount: Bool,
         context: inout GraphicsContext,
         size: CGSize
     ) {
@@ -92,7 +93,7 @@ struct TreemapRenderer {
 
             // Label
             if !isFiltered, !isSpotlit {
-                drawLabel(context: &context, cell: cell, center: center)
+                drawLabel(context: &context, cell: cell, center: center, showFileCount: showFileCount)
             }
         }
     }
@@ -116,7 +117,7 @@ struct TreemapRenderer {
 
     // MARK: - Labels
 
-    private static func drawLabel(context: inout GraphicsContext, cell: TreemapCell, center: CGPoint) {
+    private static func drawLabel(context: inout GraphicsContext, cell: TreemapCell, center: CGPoint, showFileCount: Bool) {
         let arcLen = cell.arcLength
         let bandH  = cell.outerRadius - cell.innerRadius
         guard arcLen > 38, bandH > 12 else { return }
@@ -141,14 +142,31 @@ struct TreemapRenderer {
                     .font(.system(size: 8.5, weight: .regular))
                     .foregroundStyle(.white.opacity(0.75))
             )
+
+            let showCount = showFileCount && cell.node.isDirectory && !cell.node.children.isEmpty
+            let countText: GraphicsContext.ResolvedText? = showCount ? ctx.resolve(
+                Text("\(cell.node.children.count) items")
+                    .font(.system(size: 7.5, weight: .regular))
+                    .foregroundStyle(.white.opacity(0.55))
+            ) : nil
+
             let ns = nameText.measure(in: CGSize(width: maxW, height: 20))
             guard ns.width <= maxW else { return }
             let ss = sizeText.measure(in: CGSize(width: maxW, height: 16))
+            let cs = countText?.measure(in: CGSize(width: maxW, height: 14)) ?? .zero
             let gap: CGFloat = 2
-            let blockH = ns.height + gap + ss.height
-            ctx.draw(nameText, at: CGPoint(x: pt.x, y: pt.y - blockH / 2 + ns.height / 2), anchor: .center)
+            var blockH = ns.height + gap + ss.height
+            if countText != nil { blockH += gap + cs.height }
+
+            var y = pt.y - blockH / 2 + ns.height / 2
+            ctx.draw(nameText, at: CGPoint(x: pt.x, y: y), anchor: .center)
+            y += ns.height / 2 + gap + ss.height / 2
             if ss.width <= maxW {
-                ctx.draw(sizeText, at: CGPoint(x: pt.x, y: pt.y + blockH / 2 - ss.height / 2), anchor: .center)
+                ctx.draw(sizeText, at: CGPoint(x: pt.x, y: y), anchor: .center)
+            }
+            if let countText, cs.width <= maxW {
+                y += ss.height / 2 + gap + cs.height / 2
+                ctx.draw(countText, at: CGPoint(x: pt.x, y: y), anchor: .center)
             }
         } else {
             let nameText = ctx.resolve(

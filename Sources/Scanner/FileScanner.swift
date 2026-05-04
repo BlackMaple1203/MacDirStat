@@ -180,6 +180,10 @@ private func _listDirectory(path: String, url: URL, rootDev: dev_t?, node: FSNod
     defer { closedir(dir) }
     let directoryFD = dirfd(dir)
 
+    let rawExcluded = UserDefaults.standard.string(forKey: "excludedFolderNames")
+        ?? ".git,node_modules,DerivedData,.Trash"
+    let excludedNames = Set(rawExcluded.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty })
+
     while let entry = readdir(dir) {
         let nameBytes = entry.pointee.d_name
         let name: String = withUnsafeBytes(of: nameBytes) { ptr in
@@ -187,6 +191,8 @@ private func _listDirectory(path: String, url: URL, rootDev: dev_t?, node: FSNod
             return String(cString: bytes.baseAddress!)
         }
         guard name != "." && name != ".." else { continue }
+        if name.hasPrefix("."), !UserDefaults.standard.bool(forKey: "showHiddenFiles") { continue }
+        if excludedNames.contains(name) { continue }
 
         let childURL = url.appendingPathComponent(name, isDirectory: entry.pointee.d_type == DT_DIR)
         let dtype = entry.pointee.d_type

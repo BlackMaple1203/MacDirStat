@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TreemapView: View {
     @EnvironmentObject private var vm: ScanViewModel
+    @AppStorage("showFileCount") private var showFileCount = false
     @State private var hoveredCell: TreemapCell?
     @State private var cursorPos: CGPoint = .zero
     @State private var viewSize: CGSize = .zero
@@ -43,6 +44,7 @@ struct TreemapView: View {
                     highlightedExtension: vm.highlightedExtension,
                     duplicatesReady: vm.duplicatesReady,
                     pulsePhase: pulse,
+                    showFileCount: showFileCount,
                     context: &ctx,
                     size: size
                 )
