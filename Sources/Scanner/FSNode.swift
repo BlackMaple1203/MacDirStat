@@ -24,6 +24,6 @@ public final class FSNode: Identifiable, @unchecked Sendable {
 
 public extension FSNode {
     var optionalChildren: [FSNode]? {
-        isDirectory && !children.isEmpty ? children.sorted { $0.size > $1.size } : nil
+        isDirectory && !children.isEmpty ? children : nil
     }
 }

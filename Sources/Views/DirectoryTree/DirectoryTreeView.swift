@@ -6,7 +6,7 @@ struct DirectoryTreeView: View {
     var body: some View {
         Group {
             if let root = vm.root {
-                List(root.children.sorted { $0.size > $1.size }, children: \.optionalChildren) { node in
+                List(root.children, children: \.optionalChildren) { node in
                     NodeRow(node: node, isSelected: vm.selectedNode?.id == node.id)
                         .contentShape(Rectangle())
                         .onTapGesture { vm.select(node) }

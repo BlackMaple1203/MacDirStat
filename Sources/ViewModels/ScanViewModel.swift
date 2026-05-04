@@ -94,9 +94,15 @@ public final class ScanViewModel: ObservableObject {
                     self.itemsScanned = items
                     self.bytesFound = bytes
                 case .completed(let node):
-                    self.root = node
                     self.isScanning = false
                     self.isComputingLayout = true   // keep spinner until treemap is ready
+                    // Sort all children by size once, off-thread, so every downstream
+                    // consumer (DirectoryTree, TreemapLayout) reads pre-sorted data and
+                    // never needs to sort again — eliminates all main-thread sort freezes.
+                    await Task.detached(priority: .userInitiated) {
+                        Self.sortAllChildren(node: node)
+                    }.value
+                    self.root = node
                     let map = ExtensionColorMap(root: node)
                     self.colorMap = map
                     await self.recomputeLayout()
@@ -223,6 +229,16 @@ public final class ScanViewModel: ObservableObject {
         guard myGen == layoutGeneration else { return }
         self.cells = computed
         self.isComputingLayout = false
+    }
+
+    private nonisolated static func sortAllChildren(node: FSNode) {
+        var stack: [FSNode] = [node]
+        while !stack.isEmpty {
+            let n = stack.removeLast()
+            guard !n.children.isEmpty else { continue }
+            n.children.sort { $0.size > $1.size }
+            stack.append(contentsOf: n.children)
+        }
     }
 
     private nonisolated static func collectAll(node: FSNode, into list: inout [FSNode]) {

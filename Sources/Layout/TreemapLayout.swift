@@ -25,7 +25,7 @@ public struct TreemapLayout {
         var cells: [TreemapCell] = []
         guard rect.width > 1, rect.height > 1, root.size > 0 else { return cells }
 
-        let children = root.children.filter { $0.size > 0 }.sorted { $0.size > $1.size }
+        let children = root.children.filter { $0.size > 0 }
         guard !children.isEmpty else { return cells }
 
         let maxR = min(rect.width, rect.height) / 2 - 10
@@ -81,7 +81,7 @@ public struct TreemapLayout {
             ))
 
             if child.isDirectory, !child.children.isEmpty {
-                let sorted = child.children.filter { $0.size > 0 }.sorted { $0.size > $1.size }
+                let sorted = child.children.filter { $0.size > 0 }
                 layout(sorted,
                        parentStart: angle, parentEnd: arcEnd,
                        depth: depth + 1, colorMap: colorMap,
