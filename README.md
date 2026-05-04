@@ -9,7 +9,7 @@ A fast, beautiful macOS disk usage visualizer — built entirely in Swift.</p>
 
 [![macOS](https://img.shields.io/badge/macOS-14%2B-black?style=flat-square&logo=apple)](https://www.apple.com/macos/)
 [![Swift](https://img.shields.io/badge/Swift-5.10-F05138?style=flat-square&logo=swift)](https://swift.org)
-[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](./LICENSE)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](./LICENSE)
 [![Download](https://img.shields.io/badge/Download-v1.0-007AFF?style=flat-square&logo=apple)](https://github.com/Ti-03/MacDirStat/releases)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-FF5E5B?style=flat-square&logo=ko-fi)](https://ko-fi.com/ti003)
 
@@ -83,8 +83,8 @@ PRs welcome. Open an issue first for anything beyond a bug fix.
 
 ## License
 
-MIT — free to use, modify, and distribute.  
-If you find it useful, the App Store version *(coming soon)* will be the best way to say thanks.
+AGPL-3.0 — free to use, modify, and distribute. If you modify and distribute this software, you must release your changes under the same license. See [LICENSE](./LICENSE) for details.  
+If you find it useful, the App Store version *(coming soon)* or [Ko-fi](https://ko-fi.com/ti003) are the best ways to say thanks.
 
 ---
 
