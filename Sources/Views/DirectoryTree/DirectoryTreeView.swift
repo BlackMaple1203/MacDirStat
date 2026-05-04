@@ -6,6 +6,7 @@ struct DirectoryTreeView: View {
     var body: some View {
         Group {
             if let root = vm.root {
+                VStack(spacing: 0) {
                 List(root.children, children: \.optionalChildren) { node in
                     NodeRow(node: node, isSelected: vm.selectedNode?.id == node.id)
                         .contentShape(Rectangle())
@@ -54,9 +55,45 @@ struct DirectoryTreeView: View {
                 .listStyle(.inset)
                 .scrollContentBackground(.hidden)
                 .background(.ultraThinMaterial)
+
+                SafetyLegend()
+                } // VStack
             } else {
                 ScanningPlaceholder(items: vm.itemsScanned, bytes: vm.bytesFound)
             }
+        }
+    }
+}
+
+private struct SafetyLegend: View {
+    var body: some View {
+        HStack(spacing: 12) {
+            LegendItem(icon: "checkmark.circle.fill", color: .green,  label: "Safe to delete")
+            LegendItem(icon: "exclamationmark.triangle.fill", color: .red, label: "Do not delete")
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 7)
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial)
+        .overlay(alignment: .top) {
+            Divider()
+        }
+    }
+}
+
+private struct LegendItem: View {
+    let icon: String
+    let color: Color
+    let label: String
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundStyle(color.opacity(0.85))
+            Text(label)
+                .font(.system(size: 10))
+                .foregroundStyle(.secondary)
         }
     }
 }
