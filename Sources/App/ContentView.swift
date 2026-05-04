@@ -8,6 +8,7 @@ struct ContentView: View {
     @AppStorage("showFileTree") private var userWantsTree = true
     @State private var scanHidesTree = false
     @State private var activeTab: DetailTab = .treemap
+    @State private var showingSettings = false
     @Namespace private var tabNamespace
 
     private var showTree: Bool { userWantsTree && !scanHidesTree }
@@ -82,6 +83,17 @@ struct ContentView: View {
                 } else {
                     Button("Open Folder…") { openFolderPicker(vm: vm) }
                         .buttonStyle(.glassProminent)
+                }
+
+                Button {
+                    showingSettings.toggle()
+                } label: {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 13))
+                }
+                .help("Settings & About")
+                .popover(isPresented: $showingSettings, arrowEdge: .bottom) {
+                    DashboardSettingsView()
                 }
             }
         }
@@ -374,6 +386,50 @@ private struct FullDiskAccessBanner: View {
         .padding(.vertical, 9)
         .background(.orange.opacity(0.15))
         .overlay(alignment: .bottom) { Divider().overlay(.orange.opacity(0.3)) }
+    }
+}
+
+// MARK: - Dashboard settings popover
+
+private struct DashboardSettingsView: View {
+    @AppStorage("hapticFeedbackEnabled") private var hapticEnabled = true
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Settings")
+                    .font(.headline)
+                Toggle("Haptic feedback", isOn: $hapticEnabled)
+                    .toggleStyle(.switch)
+                    .controlSize(.small)
+                Text("Feel file weights as you explore the chart.\nRequires a Force Touch trackpad.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding()
+
+            Divider()
+
+            VStack(spacing: 6) {
+                Image(systemName: "square.3.layers.3d")
+                    .font(.system(size: 30, weight: .thin))
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(.primary.opacity(0.8))
+                Text("MacDirStat")
+                    .font(.system(size: 13, weight: .semibold))
+                if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                    Text("Version \(v)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Link("ti0.me", destination: URL(string: "http://ti0.me/")!)
+                    .font(.caption)
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+        }
+        .frame(width: 250)
     }
 }
 
