@@ -204,7 +204,7 @@ private func _listDirectory(path: String, url: URL, rootDev: dev_t?, node: FSNod
                 if mode == S_IFLNK { continue }
                 if mode != S_IFDIR {
                     // It's a regular file with DT_UNKNOWN
-                    let allocSize = Int64(st.st_blocks) * 512
+                    let allocSize = allocatedSize(st: st, visited: visited)
                     let ext = childURL.pathExtension.lowercased()
                     let fileNode = FSNode(url: childURL, name: name, isDirectory: false, size: allocSize, fileExtension: ext, parent: node)
                     result.children.append(fileNode)
@@ -227,7 +227,7 @@ private func _listDirectory(path: String, url: URL, rootDev: dev_t?, node: FSNod
         } else if dtype == DT_REG {
             var st = stat()
             guard fstatat(directoryFD, name, &st, AT_SYMLINK_NOFOLLOW) == 0 else { continue }
-            let allocSize = Int64(st.st_blocks) * 512
+            let allocSize = allocatedSize(st: st, visited: visited)
             let ext = childURL.pathExtension.lowercased()
             let fileNode = FSNode(url: childURL, name: name, isDirectory: false, size: allocSize, fileExtension: ext, parent: node)
             result.children.append(fileNode)
@@ -239,6 +239,16 @@ private func _listDirectory(path: String, url: URL, rootDev: dev_t?, node: FSNod
     }
 
     return result
+}
+
+// Returns the file's allocated disk bytes, deduplicating hardlinks via the visited set.
+// Files with nlink == 1 skip the set entirely (fast path for the common case).
+// Hardlinked files (nlink > 1) are counted only on their first encounter.
+private func allocatedSize(st: stat, visited: VisitedSet) -> Int64 {
+    if st.st_nlink > 1 {
+        guard visited.visit(dev: st.st_dev, ino: st.st_ino) else { return 0 }
+    }
+    return Int64(st.st_blocks) * 512
 }
 
 private struct SkipError: Error {}
