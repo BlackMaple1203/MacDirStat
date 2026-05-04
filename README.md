@@ -81,11 +81,6 @@ MacDirStat collects zero data. No network access. No analytics. No tracking. Eve
 
 PRs welcome. Open an issue first for anything beyond a bug fix.
 
-## License
-
-AGPL-3.0 — free to use, modify, and distribute. If you modify and distribute this software, you must release your changes under the same license. See [LICENSE](./LICENSE) for details.  
-If you find it useful, the App Store version *(coming soon)* or [Ko-fi](https://ko-fi.com/ti003) are the best ways to say thanks.
-
 ---
 
 <div align="center">
