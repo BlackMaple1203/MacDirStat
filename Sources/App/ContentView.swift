@@ -486,18 +486,6 @@ private struct DashboardSettingsView: View {
 
                 Divider()
 
-                settingsSection("Updates") {
-                    Button {
-                        NotificationCenter.default.post(name: .checkForUpdates, object: nil)
-                    } label: {
-                        Label("Check for Updates…", systemImage: "arrow.trianglehead.clockwise")
-                            .font(.system(size: 12))
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                }
-
-                Divider()
 
                 VStack(spacing: 5) {
                     Image(systemName: "square.3.layers.3d")

@@ -20,6 +20,7 @@
 		86B25923164A00AB10D72C9B /* ScanProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBCAD22DB54E68077B842421 /* ScanProgress.swift */; };
 		8D4491F1E310D7522AC953CF /* ByteFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B63B9141E78488371B27E584 /* ByteFormatter.swift */; };
 		99810209AD4FE3320BC122AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 58F02208A1E6A99468703A4E /* Assets.xcassets */; };
+		AA00BB11CC22DD33EE44FF55 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA00BB11CC22DD33EE44FF56 /* PrivacyInfo.xcprivacy */; };
 		A0ACA58C598D03980CE0E1A8 /* DirectoryTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51083B9602AF3966A2918311 /* DirectoryTreeView.swift */; };
 		AA11223344556677889900AA /* SafetyAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11223344556677889900BB /* SafetyAnalyzer.swift */; };
 		AEE6BD1042811A9E652EFFD1 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CAC3593B7A665AD55414A36 /* SidebarView.swift */; };
@@ -50,6 +51,7 @@
 		87CAB05044416C1233CD89F1 /* MacDirStat.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacDirStat.entitlements; sourceTree = "<group>"; };
 		8911D9B9B974332D6C8A0DC6 /* ScanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanViewModel.swift; sourceTree = "<group>"; };
 		967A6155625E5F7CD9A4CC95 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA00BB11CC22DD33EE44FF56 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		987EDA67820F162556A7CA53 /* ExtensionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionListView.swift; sourceTree = "<group>"; };
 		9CCF3DBFA96ECFE224E1D228 /* FileTypeIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTypeIcon.swift; sourceTree = "<group>"; };
 		A57889EBA74C350CC3B289A7 /* TreemapCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapCell.swift; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 			children = (
 				87CAB05044416C1233CD89F1 /* MacDirStat.entitlements */,
 				967A6155625E5F7CD9A4CC95 /* Info.plist */,
+				AA00BB11CC22DD33EE44FF56 /* PrivacyInfo.xcprivacy */,
 				58F02208A1E6A99468703A4E /* Assets.xcassets */,
 			);
 			path = MacDirStat;
@@ -298,6 +301,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				99810209AD4FE3320BC122AD /* Assets.xcassets in Resources */,
+				AA00BB11CC22DD33EE44FF55 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
