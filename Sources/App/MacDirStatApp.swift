@@ -1,22 +1,13 @@
 import SwiftUI
-import Sparkle
 
 @main
 struct MacDirStatApp: App {
     @StateObject private var vm = ScanViewModel()
-    private let updaterController = SPUStandardUpdaterController(
-        startingUpdater: true,
-        updaterDelegate: nil,
-        userDriverDelegate: nil
-    )
 
     var body: some Scene {
-        WindowGroup("MacDirStat") {
+        WindowGroup("DirStat") {
             ContentView()
                 .environmentObject(vm)
-                .onReceive(NotificationCenter.default.publisher(for: .checkForUpdates)) { _ in
-                    updaterController.updater.checkForUpdates()
-                }
         }
         .defaultSize(width: 1200, height: 800)
         Settings {
@@ -36,15 +27,15 @@ struct MacDirStatApp: App {
                 .keyboardShortcut("e", modifiers: [.command, .shift])
             }
             CommandGroup(after: .appInfo) {
-                Button("Check for Updates…") {
-                    updaterController.updater.checkForUpdates()
+                Button("Visit Website") {
+                    NSWorkspace.shared.open(URL(string: "https://ti-03.github.io/MacDirStat/")!)
                 }
-                .disabled(!updaterController.updater.canCheckForUpdates)
             }
         }
     }
 }
 
+@MainActor
 private func openFolderPicker(vm: ScanViewModel) {
     let panel = NSOpenPanel()
     panel.canChooseDirectories = true

@@ -12,6 +12,8 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleDisplayName</key>
+	<string>DirStat</string>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
 	<key>CFBundlePackageType</key>
@@ -29,12 +31,9 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSFullDiskAccessUsageDescription</key>
-	<string>MacDirStat needs Full Disk Access to accurately show the size of all files and folders on your Mac, including protected system and user data.</string>
+	<string>DirStat needs Full Disk Access to accurately show the size of all files and folders on your Mac, including protected system and user data.</string>
 	<key>CFBundleDocumentTypes</key>
 	<array/>
-	<key>SUFeedURL</key>
-	<string>https://api.amore.computer/v1/apps/com.macdirstat.app/appcast.xml</string>
-	<key>SUPublicEDKey</key>
-	<string>WgggQWniaglw/74PgfAXNc80yA5L8Bwv6row7CcmXk0=</string>
+
 </dict>
 </plist>

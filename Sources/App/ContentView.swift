@@ -300,7 +300,7 @@ private struct WelcomeView: View {
                     .glassEffect(in: .circle)
 
                 VStack(spacing: 10) {
-                    Text("MacDirStat")
+                    Text("DirStat")
                         .font(.system(size: 34, weight: .bold, design: .rounded))
                         .foregroundStyle(.primary)
                     Text("Visualize your disk space usage at a glance")
@@ -374,7 +374,7 @@ private struct FullDiskAccessBanner: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text("Full Disk Access required for complete results")
                     .font(.system(size: 12, weight: .semibold))
-                Text("Go to System Settings → Privacy & Security → Full Disk Access and add MacDirStat.")
+                Text("Go to System Settings → Privacy & Security → Full Disk Access and add DirStat.")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }
@@ -504,7 +504,7 @@ private struct DashboardSettingsView: View {
                         .font(.system(size: 28, weight: .thin))
                         .symbolRenderingMode(.hierarchical)
                         .foregroundStyle(.primary.opacity(0.8))
-                    Text("MacDirStat")
+                    Text("DirStat")
                         .font(.system(size: 13, weight: .semibold))
                     if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
                         Text("Version \(v)")
@@ -555,7 +555,6 @@ private struct DashboardSettingsView: View {
 
 extension Notification.Name {
     static let exportCSV = Notification.Name("MacDirStat.exportCSV")
-    static let checkForUpdates = Notification.Name("MacDirStat.checkForUpdates")
 }
 
 @MainActor
