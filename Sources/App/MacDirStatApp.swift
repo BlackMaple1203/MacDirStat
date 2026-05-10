@@ -1,8 +1,14 @@
 import SwiftUI
+import Sparkle
 
 @main
 struct MacDirStatApp: App {
     @StateObject private var vm = ScanViewModel()
+    private let updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: nil,
+        userDriverDelegate: nil
+    )
 
     var body: some Scene {
         WindowGroup("DirStat") {
@@ -27,6 +33,9 @@ struct MacDirStatApp: App {
                 .keyboardShortcut("e", modifiers: [.command, .shift])
             }
             CommandGroup(after: .appInfo) {
+                Button("Check for Updates…") {
+                    updaterController.updater.checkForUpdates(nil)
+                }
                 Button("Visit Website") {
                     NSWorkspace.shared.open(URL(string: "https://ti-03.github.io/MacDirStat/")!)
                 }
