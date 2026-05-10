@@ -33,6 +33,7 @@
 		F81DF36922942E2F442814A3 /* TreemapLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB4247FB8E3E3FB5AF053F9 /* TreemapLayout.swift */; };
 		FB3E660E0C4E74F2A9EFBEF0 /* FileScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD56FD4714436315629F989 /* FileScanner.swift */; };
 		FD11F6ED4164F05503706848 /* ExtensionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987EDA67820F162556A7CA53 /* ExtensionListView.swift */; };
+		SPARK003000000000000003AA /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = SPARK002000000000000002AA /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -72,6 +73,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				SPARK003000000000000003AA /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,6 +260,7 @@
 			);
 			name = MacDirStat;
 			packageProductDependencies = (
+				SPARK002000000000000002AA /* Sparkle */,
 			);
 			productName = MacDirStat;
 			productReference = F6ADF08FD012926F8704A51C /* MacDirStat.app */;
@@ -288,6 +291,7 @@
 			);
 			mainGroup = 71D2E56247FE75C3DCE9B609;
 			packageReferences = (
+				SPARK001000000000000001AA /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			productRefGroup = 30772F61AC9BDC8631745269 /* Products */;
 			projectDirPath = "";
@@ -354,7 +358,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = L4UH9K7AW4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -365,7 +369,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.macdirstat.app;
 				PRODUCT_NAME = DirStat;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -382,7 +386,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = L4UH9K7AW4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -393,7 +397,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.macdirstat.app;
 				PRODUCT_NAME = DirStat;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -541,6 +545,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		SPARK001000000000000001AA /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		SPARK002000000000000002AA /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = SPARK001000000000000001AA /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 	};
 	rootObject = DB931C7330675EECD13E725C /* Project object */;
