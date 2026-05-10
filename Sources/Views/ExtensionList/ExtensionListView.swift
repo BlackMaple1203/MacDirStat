@@ -104,7 +104,7 @@ struct ExtensionListView: View {
                                 .font(.system(size: 11, weight: .medium))
                         }
                     }
-                    .buttonStyle(.glass)
+                    .glassButton()
                     .controlSize(.small)
                     .popover(isPresented: $showAllPopover, arrowEdge: .bottom) {
                         allExtensionsPopover
@@ -223,7 +223,7 @@ struct ExtensionListView: View {
                 .font(.system(size: 13))
                 .frame(width: 28, height: 28)
         }
-        .buttonStyle(.glass)
+        .glassButton()
         .controlSize(.small)
         .help(help)
     }
@@ -262,10 +262,7 @@ private struct ExtLegendPill: View {
         }
         .padding(.horizontal, 9)
         .padding(.vertical, 5)
-        .glassEffect(
-            .regular.tint(isActive ? item.color.opacity(0.4) : Color.clear).interactive(),
-            in: .capsule
-        )
+        .glassTintedInteractiveCapsule(tint: isActive ? item.color.opacity(0.4) : Color.clear)
         .animation(.easeInOut(duration: 0.15), value: isActive)
     }
 }

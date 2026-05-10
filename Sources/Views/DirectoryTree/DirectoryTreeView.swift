@@ -78,7 +78,7 @@ private struct ScanningPlaceholder: View {
             }
         }
         .padding(28)
-        .glassEffect(in: .rect(cornerRadius: 18))
+        .glassCard(cornerRadius: 18)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

@@ -80,11 +80,11 @@ struct ContentView: View {
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .glassEffect(in: .capsule)
+                    .glassCapsule()
                     .transition(.opacity)
                 } else {
                     Button("Open Folder…") { openFolderPicker(vm: vm) }
-                        .buttonStyle(.glassProminent)
+                        .glassProminentButton()
                 }
 
                 Button {
@@ -99,11 +99,11 @@ struct ContentView: View {
                 }
             }
         }
-        .onChange(of: vm.isScanning) { _, scanning in
+        .onChange(of: vm.isScanning) { scanning in
             scanHidesTree = scanning
             if scanning { activeTab = .treemap }
         }
-        .onChange(of: treemapColorScheme) { vm.refreshLayout() }
+        .onChange(of: treemapColorScheme) { _ in vm.refreshLayout() }
         .onAppear {
             if defaultTab == "duplicates" { activeTab = .duplicates }
         }
@@ -122,7 +122,7 @@ struct ContentView: View {
                       badge: duplicatesBadge, detecting: !vm.duplicatesReady && vm.root != nil)
         }
         .padding(3)
-        .glassEffect(.regular, in: .rect(cornerRadius: 10))
+        .glassCard(cornerRadius: 10)
         .fixedSize()
     }
 
@@ -237,7 +237,7 @@ struct ContentView: View {
                     .frame(maxWidth: 300)
             }
             .padding(32)
-            .glassEffect(.regular, in: .rect(cornerRadius: 20))
+            .glassCard(cornerRadius: 20)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             DuplicatesView()
@@ -280,16 +280,25 @@ private struct WelcomeView: View {
 
     var body: some View {
         ZStack {
-            MeshGradient(
-                width: 3, height: 3,
-                points: [
-                    .init(0, 0), .init(0.5, 0), .init(1, 0),
-                    .init(0, 0.5), .init(0.5, 0.5), .init(1, 0.5),
-                    .init(0, 1), .init(0.5, 1), .init(1, 1)
-                ],
-                colors: gradientColors
-            )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if #available(macOS 15, *) {
+                MeshGradient(
+                    width: 3, height: 3,
+                    points: [
+                        .init(0, 0), .init(0.5, 0), .init(1, 0),
+                        .init(0, 0.5), .init(0.5, 0.5), .init(1, 0.5),
+                        .init(0, 1), .init(0.5, 1), .init(1, 1)
+                    ],
+                    colors: gradientColors
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                LinearGradient(
+                    colors: [gradientColors[0], gradientColors[4], gradientColors[8]],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
 
             VStack(spacing: 32) {
                 Image(systemName: "square.3.layers.3d")
@@ -297,7 +306,7 @@ private struct WelcomeView: View {
                     .foregroundStyle(.primary.opacity(0.85))
                     .symbolRenderingMode(.hierarchical)
                     .padding(24)
-                    .glassEffect(in: .circle)
+                    .glassCircle()
 
                 VStack(spacing: 10) {
                     Text("DirStat")
@@ -310,7 +319,7 @@ private struct WelcomeView: View {
                 }
 
                 Button("Open Folder…") { openFolderPicker(vm: vm) }
-                    .buttonStyle(.glassProminent)
+                    .glassProminentButton()
                     .controlSize(.large)
                     .keyboardShortcut("o", modifiers: .command)
 
@@ -319,10 +328,10 @@ private struct WelcomeView: View {
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 6)
-                    .glassEffect(in: .capsule)
+                    .glassCapsule()
             }
             .padding(48)
-            .glassEffect(.regular, in: .rect(cornerRadius: 28))
+            .glassCard(cornerRadius: 28)
             .frame(maxWidth: 440)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -358,7 +367,7 @@ private struct FolderTitleView: View {
         .lineLimit(1)
         .padding(.horizontal, 10)
         .padding(.vertical, 4)
-        .glassEffect(in: .capsule)
+        .glassCapsule()
     }
 }
 

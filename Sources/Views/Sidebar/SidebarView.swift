@@ -70,7 +70,7 @@ struct SidebarView: View {
         .scrollContentBackground(.hidden)
         .animation(.easeInOut(duration: 0.3), value: vm.duplicatesReady)
         .onAppear { volumes = mountedVolumes() }
-        .onChange(of: vm.root?.url) { _, url in
+        .onChange(of: vm.root?.url) { url in
             guard let url else { return }
             addRecent(url: url)
         }
@@ -141,7 +141,7 @@ private struct VolumeRow: View {
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 4)
-        .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 10))
+        .glassInteractiveCard(cornerRadius: 10)
     }
 
     private func capacityColor(fraction: Double) -> Color {

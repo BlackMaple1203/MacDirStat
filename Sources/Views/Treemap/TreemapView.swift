@@ -22,7 +22,7 @@ struct TreemapView: View {
                                     paused: vm.selectedNode == nil)) { timeline in
                 let pulse = pulsePhase(from: timeline)
                 mainContent(pulse: pulse)
-                    .onChange(of: geo.size) { _, s in viewSize = s; vm.updateLayoutSize(s) }
+                    .onChange(of: geo.size) { s in viewSize = s; vm.updateLayoutSize(s) }
                     .onAppear { viewSize = geo.size; vm.updateLayoutSize(geo.size) }
             }
         }
@@ -85,7 +85,7 @@ struct TreemapView: View {
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 .padding(20)
-                .glassEffect(in: .rect(cornerRadius: 16))
+                .glassCard(cornerRadius: 16)
                 .allowsHitTesting(false)
             } else if let root = vm.treemapRoot, !vm.cells.isEmpty {
                 centerLabel(for: root)
@@ -94,8 +94,11 @@ struct TreemapView: View {
 
             // ── Empty folder ─────────────────────────────────────────────────
             if vm.cells.isEmpty, !vm.isScanning, !vm.isComputingLayout, vm.root != nil {
-                ContentUnavailableView("Empty Folder", systemImage: "folder",
-                    description: Text("This folder contains no files"))
+                CompatContentUnavailableView(
+                    title: "Empty Folder",
+                    systemImage: "folder",
+                    description: Text("This folder contains no files")
+                )
             }
 
             // ── Live indicator ───────────────────────────────────────────────
@@ -239,7 +242,7 @@ struct TreemapView: View {
         }
         .frame(width: TreemapLayout.centerRadius * 2 - 8,
                height: TreemapLayout.centerRadius * 2 - 8)
-        .glassEffect(.regular, in: .circle)
+        .glassCircle()
         .contentTransition(.numericText())
         .animation(.easeInOut(duration: 0.3), value: root.id)
     }
@@ -356,9 +359,9 @@ private struct HoverTooltip: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
         .frame(maxWidth: 380)
-        .glassEffect(
-            .regular.tint(node.isDirectory ? Color.clear : FileTypeIcon.color(for: node).opacity(0.25)),
-            in: .rect(cornerRadius: 14)
+        .glassTintedCard(
+            tint: node.isDirectory ? Color.clear : FileTypeIcon.color(for: node).opacity(0.25),
+            cornerRadius: 14
         )
     }
 }
@@ -382,6 +385,6 @@ private struct LiveBadge: View {
         }
         .padding(.horizontal, 7)
         .padding(.vertical, 4)
-        .glassEffect(in: .capsule)
+        .glassCapsule()
     }
 }

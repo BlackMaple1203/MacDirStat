@@ -135,19 +135,19 @@ struct TreemapRenderer {
             let nameText = ctx.resolve(
                 Text(cell.node.name)
                     .font(.system(size: 10.5, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundColor(.white)
             )
             let sizeText = ctx.resolve(
                 Text(ByteFormatter.string(from: cell.node.size))
                     .font(.system(size: 8.5, weight: .regular))
-                    .foregroundStyle(.white.opacity(0.75))
+                    .foregroundColor(.white.opacity(0.75))
             )
 
             let showCount = showFileCount && cell.node.isDirectory && !cell.node.children.isEmpty
             let countText: GraphicsContext.ResolvedText? = showCount ? ctx.resolve(
                 Text("\(cell.node.children.count) items")
                     .font(.system(size: 7.5, weight: .regular))
-                    .foregroundStyle(.white.opacity(0.55))
+                    .foregroundColor(.white.opacity(0.55))
             ) : nil
 
             let ns = nameText.measure(in: CGSize(width: maxW, height: 20))
@@ -172,7 +172,7 @@ struct TreemapRenderer {
             let nameText = ctx.resolve(
                 Text(cell.node.name)
                     .font(.system(size: 9.5, weight: .medium))
-                    .foregroundStyle(.white)
+                    .foregroundColor(.white)
             )
             let ns = nameText.measure(in: CGSize(width: maxW, height: 20))
             guard ns.width <= maxW else { return }

@@ -8,9 +8,11 @@ struct DuplicatesView: View {
     var body: some View {
         let groups = vm.duplicateGroups
         if groups.isEmpty {
-            ContentUnavailableView("No Duplicates Found",
+            CompatContentUnavailableView(
+                title: "No Duplicates Found",
                 systemImage: "checkmark.circle",
-                description: Text("No duplicate files were detected"))
+                description: Text("No duplicate files were detected")
+            )
         } else {
             VStack(spacing: 0) {
                 summaryBar(groups: groups)
@@ -60,7 +62,7 @@ struct DuplicatesView: View {
                 Label("Delete All Duplicates", systemImage: "trash")
                     .font(.caption.weight(.medium))
             }
-            .buttonStyle(.glass)
+            .glassButton()
             .tint(.red)
             .controlSize(.small)
         }
@@ -155,7 +157,7 @@ private struct GroupSection: View {
                         Label("Keep 1, Delete \(group.count - 1)", systemImage: "trash")
                             .font(.system(size: 11, weight: .medium))
                     }
-                    .buttonStyle(.glass)
+                    .glassButton()
                     .tint(.red)
                     .controlSize(.mini)
                     // Don't let the delete button trigger the expand toggle
