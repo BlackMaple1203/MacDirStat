@@ -34,7 +34,7 @@ struct MacDirStatApp: App {
             }
             CommandGroup(after: .appInfo) {
                 Button("Check for Updates…") {
-                    updaterController.updater.checkForUpdates(nil)
+                    updaterController.checkForUpdates(nil)
                 }
                 Button("Visit Website") {
                     NSWorkspace.shared.open(URL(string: "https://ti-03.github.io/MacDirStat/")!)
